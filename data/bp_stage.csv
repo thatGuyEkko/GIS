@@ -1,0 +1,4 @@
+bp_code,display_order,stage_name,stage_topic,stage_summary,period_start_date,period_end_date,rent_investment_amount,fixed_investment_amount,sales_investment_amount,expected_gmv_amount,expected_profit_amount,stage_roi_percent,cumulative_cashflow_amount,sales_cost_positive_flag
+BP-2026-001,1,阶段1,完成技术对接与 API 联调,打通库存价格订单回传链路并完成联调验收,2026-07-01,2026-08-31,0,9000000,2800000,0,-11800000,0,-11800000,false
+BP-2026-001,2,阶段2,首批 30 家酒店上线,覆盖机场与核心商圈重点酒店形成首轮稳定可售库存,2026-09-01,2026-10-31,0,6500000,1900000,78000000,8200000,97,-3600000,true
+BP-2026-001,3,阶段3,扩展高端连锁合作,完成高星酒店补齐优化商旅客群价格与房型结构,2026-11-01,2026-12-31,0,4500000,1300000,162000000,21000000,362,17400000,true

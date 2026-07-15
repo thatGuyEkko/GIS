@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OOMS | 商业BP管理</title>
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-name">OOMS 出海数字化</div>
+        <div class="brand-sub">原型已重构为独立页面，仅保留商机主链路的静态展示模块。</div>
+      </div>
+      <nav class="nav-group">
+        <a class="nav-item" href="index.html">
+          <span class="nav-title">商机看板</span>
+          <span class="nav-desc">全局规模、区域分布、转化概览</span>
+        </a>
+        <a class="nav-item" href="leads.html">
+          <span class="nav-title">线索商机管理</span>
+          <span class="nav-desc">线索池、在管商机、关闭样本</span>
+        </a>
+        <a class="nav-item" href="eval.html">
+          <span class="nav-title">商机评估管理</span>
+          <span class="nav-desc">筛查状态、评分结果、评估结论</span>
+        </a>
+        <a class="nav-item active" href="bp.html">
+          <span class="nav-title">商业BP管理</span>
+          <span class="nav-desc">BP台账、投资测算、执行里程碑</span>
+        </a>
+      </nav>
+    </aside>
+
+    <main class="content">
+      <div class="page-head">
+        <div>
+          <div class="page-kicker">模块四 / Business Plan</div>
+          <h1 class="page-title">商业BP管理</h1>
+          <p class="page-sub">当前页面仅保留 BP 台账总览。关联商机改为多标签表达，一个 BP 可同时映射多个推进对象；详细财务模型、执行摘要、里程碑与分期间财务明细统一在详情页查看。</p>
+        </div>
+        <div class="head-aside">
+          <div class="summary-card">
+            <div class="summary-label">当前 BP 台账</div>
+            <div class="summary-value mono">5 份</div>
+            <div class="summary-meta">3 份已通过，1 份审批中，1 份草稿</div>
+          </div>
+        </div>
+      </div>
+
+      <section class="metrics">
+        <div class="metric-card">
+          <div class="metric-label">BP总数</div>
+          <div class="metric-value" style="color:var(--purple);">5</div>
+          <div class="metric-sub">覆盖开站、直签、收购和联营样本</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">关联商机</div>
+          <div class="metric-value" style="color:var(--blue);">9个</div>
+          <div class="metric-sub">一个 BP 可关联多个国家、城市或业务机会</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">协同BG</div>
+          <div class="metric-value" style="color:var(--green);">5类</div>
+          <div class="metric-sub">酒旅、出行、市场、商旅、体验均有覆盖</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">市场类型</div>
+          <div class="metric-value" style="color:var(--orange);">3类</div>
+          <div class="metric-sub">入境游、出境游、境内游均有布局样本</div>
+        </div>
+      </section>
+
+      <section class="table-card section">
+        <table class="wide-table-lg">
+          <thead>
+            <tr>
+              <th style="width:120px;">BP编号</th>
+              <th style="width:300px;">BP标题</th>
+              <th style="width:260px;">关联商机</th>
+              <th style="width:220px;">涉及配合的BG</th>
+              <th style="width:220px;">主营产品</th>
+              <th style="width:120px;">市场类型</th>
+              <th style="width:90px;">状态</th>
+              <th style="width:80px;">负责人</th>
+              <th style="width:90px;">提交时间</th>
+              <th style="width:90px;">更新时间</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="mono">BP-2026-001</td>
+              <td>
+                <div class="cell-title"><a class="detail-link" href="bp-details/bp-2026-001.html">日本关西酒店直签商业计划书</a></div>
+                <div class="cell-sub">大阪/京都核心区直签，预测整体 GMV 2.4 亿</div>
+              </td>
+              <td><div class="tag-row"><span class="tag tag-blue">日本关西直签</span><span class="tag tag-purple">大阪商圈拓展</span><span class="tag tag-teal">京都高星酒店补齐</span></div></td>
+              <td><div class="tag-row"><span class="tag tag-purple">酒旅</span><span class="tag tag-blue">商旅</span><span class="tag tag-teal">市场</span></div></td>
+              <td><div class="tag-row"><span class="tag tag-blue">酒店</span></div></td>
+              <td><span class="tag tag-orange">出境游</span></td>
+              <td><span class="tag tag-green">已通过</span></td>
+              <td>张三</td>
+              <td class="mono" style="color:var(--text-muted);">06-25</td>
+              <td class="mono" style="color:var(--text-muted);">07-01</td>
+            </tr>
+            <tr>
+              <td class="mono">BP-2026-002</td>
+              <td>
+                <div class="cell-title"><a class="detail-link" href="bp-details/bp-2026-002.html">越南胡志明市开站商业计划书</a></div>
+                <div class="cell-sub">四阶段落地，面向站点开设和供给启动</div>
+              </td>
+              <td><div class="tag-row"><span class="tag tag-blue">越南开站</span><span class="tag tag-green">胡志明酒店供给</span><span class="tag tag-orange">站点冷启动投放</span></div></td>
+              <td><div class="tag-row"><span class="tag tag-purple">酒旅</span><span class="tag tag-teal">市场</span><span class="tag tag-green">体验</span></div></td>
+              <td><div class="tag-row"><span class="tag tag-blue">酒店</span><span class="tag tag-gray">民宿</span></div></td>
+              <td><span class="tag tag-orange">入境游</span></td>
+              <td><span class="tag tag-green">已通过</span></td>
+              <td>李四</td>
+              <td class="mono" style="color:var(--text-muted);">06-22</td>
+              <td class="mono" style="color:var(--text-muted);">06-30</td>
+            </tr>
+            <tr>
+              <td class="mono">BP-2026-003</td>
+              <td>
+                <div class="cell-title"><a class="detail-link" href="bp-details/bp-2026-003.html">泰国本土OTA收购商业计划书</a></div>
+                <div class="cell-sub">JV 架构设计，当前处于审批中</div>
+              </td>
+              <td><div class="tag-row"><span class="tag tag-blue">泰国 OTA 收购</span><span class="tag tag-purple">本地流量并表</span><span class="tag tag-teal">酒店履约整合</span></div></td>
+              <td><div class="tag-row"><span class="tag tag-purple">酒旅</span><span class="tag tag-teal">市场</span><span class="tag tag-green">体验</span></div></td>
+              <td><div class="tag-row"><span class="tag tag-blue">酒店</span><span class="tag tag-gray">民宿</span><span class="tag tag-teal">接送机</span></div></td>
+              <td><span class="tag tag-orange">境内游</span></td>
+              <td><span class="tag tag-orange">审批中</span></td>
+              <td>王五</td>
+              <td class="mono" style="color:var(--text-muted);">06-28</td>
+              <td class="mono" style="color:var(--text-muted);">07-03</td>
+            </tr>
+            <tr>
+              <td class="mono">BP-2026-004</td>
+              <td>
+                <div class="cell-title"><a class="detail-link" href="bp-details/bp-2026-004.html">泰国曼谷酒店批量直签收尾报告</a></div>
+                <div class="cell-sub">复盘签约效率、佣金模型与履约协同</div>
+              </td>
+              <td><div class="tag-row"><span class="tag tag-blue">曼谷酒店直签</span><span class="tag tag-purple">机场商圈覆盖</span></div></td>
+              <td><div class="tag-row"><span class="tag tag-purple">酒旅</span><span class="tag tag-blue">商旅</span></div></td>
+              <td><div class="tag-row"><span class="tag tag-blue">酒店</span></div></td>
+              <td><span class="tag tag-orange">入境游</span></td>
+              <td><span class="tag tag-green">已通过</span></td>
+              <td>张三</td>
+              <td class="mono" style="color:var(--text-muted);">05-10</td>
+              <td class="mono" style="color:var(--text-muted);">06-15</td>
+            </tr>
+            <tr>
+              <td class="mono">BP-2026-005</td>
+              <td>
+                <div class="cell-title"><a class="detail-link" href="bp-details/bp-2026-005.html">巴西圣保罗接送机与酒店联营BP</a></div>
+                <div class="cell-sub">机场场景联营样本，当前仍为草稿版</div>
+              </td>
+              <td><div class="tag-row"><span class="tag tag-blue">巴西联营开拓</span><span class="tag tag-green">圣保罗机场接送</span><span class="tag tag-orange">酒店套餐联营</span></div></td>
+              <td><div class="tag-row"><span class="tag tag-blue">出行</span><span class="tag tag-purple">酒旅</span><span class="tag tag-teal">市场</span></div></td>
+              <td><div class="tag-row"><span class="tag tag-teal">接送机</span><span class="tag tag-blue">酒店</span><span class="tag tag-gray">租车</span></div></td>
+              <td><span class="tag tag-orange">境内游</span></td>
+              <td><span class="tag tag-gray">草稿</span></td>
+              <td>周明</td>
+              <td class="mono" style="color:var(--text-muted);">07-05</td>
+              <td class="mono" style="color:var(--text-muted);">07-05</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

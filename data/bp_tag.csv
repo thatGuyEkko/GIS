@@ -1,0 +1,12 @@
+bp_code,tag_group,tag_value,display_order
+BP-2026-001,related_opportunity,日本关西直签,1
+BP-2026-001,related_opportunity,大阪商圈拓展,2
+BP-2026-001,related_opportunity,京都高星酒店补齐,3
+BP-2026-001,bg,酒旅,1
+BP-2026-001,bg,商旅,2
+BP-2026-001,bg,市场,3
+BP-2026-001,main_product,酒店,1
+BP-2026-001,market_type,出境游,1
+BP-2026-001,core_customer,跨境休闲客,1
+BP-2026-001,core_customer,差旅客,2
+BP-2026-001,core_customer,中高端酒店用户,3

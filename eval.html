@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OOMS | 商机评估管理</title>
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-name">OOMS 出海数字化</div>
+        <div class="brand-sub">原型已重构为独立页面，仅保留商机主链路的静态展示模块。</div>
+      </div>
+      <nav class="nav-group">
+        <a class="nav-item" href="index.html">
+          <span class="nav-title">商机看板</span>
+          <span class="nav-desc">全局规模、区域分布、转化概览</span>
+        </a>
+        <a class="nav-item" href="leads.html">
+          <span class="nav-title">线索商机管理</span>
+          <span class="nav-desc">线索池、在管商机、关闭样本</span>
+        </a>
+        <a class="nav-item active" href="eval.html">
+          <span class="nav-title">商机评估管理</span>
+          <span class="nav-desc">筛查状态、评分结果、评估结论</span>
+        </a>
+        <a class="nav-item" href="bp.html">
+          <span class="nav-title">商业BP管理</span>
+          <span class="nav-desc">BP台账、投资测算、执行里程碑</span>
+        </a>
+      </nav>
+    </aside>
+
+    <main class="content">
+      <div class="page-head">
+        <div>
+          <div class="page-kicker">模块三 / Evaluation</div>
+          <h1 class="page-title">商机评估管理</h1>
+          <p class="page-sub">评估页保留了流程说明、三关筛查状态、六维初评结果与结论摘要，但不再提供筛查按钮、打分弹窗、重启评估或状态推进入口。</p>
+        </div>
+        <div class="head-aside">
+          <div class="summary-card">
+            <div class="summary-label">当前评估样本</div>
+            <div class="summary-value mono">6 项</div>
+            <div class="summary-meta">待筛查 3，待初评 2，筛查不通过 1</div>
+          </div>
+        </div>
+      </div>
+
+      <section class="flow-grid section">
+        <div class="flow-card">
+          <div class="panel-title">评估流程</div>
+          <div class="flow-strip">
+            <span class="flow-step"><span class="flow-badge" style="background:var(--orange-light);color:var(--orange);">1</span><span class="flow-name" style="color:var(--orange);">三关筛查</span></span>
+            <span class="flow-arrow">&gt;</span>
+            <span class="flow-step"><span class="flow-badge" style="background:var(--blue-light);color:var(--blue);">2</span><span class="flow-name" style="color:var(--blue);">六维初评</span></span>
+            <span class="flow-arrow">&gt;</span>
+            <span class="flow-step"><span class="flow-badge" style="background:var(--green-light);color:var(--green);">3</span><span class="flow-name" style="color:var(--green);">进入商机池</span></span>
+          </div>
+          <div class="foot-note">流程只作展示说明。原型中与流程绑定的打分、提交和状态扭转逻辑已全部移除。</div>
+        </div>
+
+        <div class="flow-card">
+          <div class="panel-title">评估结论口径</div>
+          <div class="legend-row">
+            <span class="pill"><span class="dot dot-green"></span> 3.5 分及以上：推荐推进</span>
+            <span class="pill"><span class="dot dot-orange"></span> 2.5 - 3.4 分：继续观察</span>
+            <span class="pill"><span class="dot dot-red"></span> 2.4 分及以下：不建议推进</span>
+          </div>
+          <div class="foot-note">该规则作为静态说明保留，便于后续接入真实评分引擎时继续复用页面结构。</div>
+        </div>
+      </section>
+
+      <section class="metrics">
+        <div class="metric-card">
+          <div class="metric-label">待筛查</div>
+          <div class="metric-value" style="color:var(--orange);">3</div>
+          <div class="metric-sub">日本、印尼、巴西支付通道</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">待初评</div>
+          <div class="metric-value" style="color:var(--blue);">2</div>
+          <div class="metric-sub">泰国 OTA 收购、沙特数据合规</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">已通过初评</div>
+          <div class="metric-value" style="color:var(--green);">2</div>
+          <div class="metric-sub">日本关西、越南胡志明样本</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">未通过</div>
+          <div class="metric-value" style="color:var(--red);">2</div>
+          <div class="metric-sub">韩国并购、土耳其度假村</div>
+        </div>
+      </section>
+
+      <section class="table-card section">
+        <table>
+          <thead>
+            <tr>
+              <th>商机</th>
+              <th style="width:100px;">商机类型</th>
+              <th style="width:80px;">归属BG</th>
+              <th style="width:90px;">三关筛查</th>
+              <th style="width:90px;">评估状态</th>
+              <th style="width:80px;">当前得分</th>
+              <th style="width:220px;">结论摘要</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><div class="cell-title">日本关西地区酒店直签</div><div class="cell-sub">大阪、京都核心区酒店直签样本</div></td>
+              <td><span class="tag tag-purple">供应链整合</span></td>
+              <td>酒店BG</td>
+              <td><span class="tag tag-green">通过</span></td>
+              <td><span class="tag tag-green">已通过初评</span></td>
+              <td class="score good">4.2</td>
+              <td>市场吸引力与供应链匹配度均高，已进入推进样本池。</td>
+            </tr>
+            <tr>
+              <td><div class="cell-title">越南胡志明市开站</div><div class="cell-sub">政策窗口明确，开站路径清晰</div></td>
+              <td><span class="tag tag-blue">OTA平台业务</span></td>
+              <td>出行BG</td>
+              <td><span class="tag tag-green">通过</span></td>
+              <td><span class="tag tag-green">已通过初评</span></td>
+              <td class="score good">3.8</td>
+              <td>建议优先落地合规与支付牌照，再推进供应链签约。</td>
+            </tr>
+            <tr>
+              <td><div class="cell-title">泰国本土OTA收购</div><div class="cell-sub">JV 架构设计完成，估值与整合待确认</div></td>
+              <td><span class="tag tag-orange">投并购标的</span></td>
+              <td>战投部</td>
+              <td><span class="tag tag-green">通过</span></td>
+              <td><span class="tag tag-blue">待初评</span></td>
+              <td style="color:var(--text-muted);">-</td>
+              <td>筛查通过，静态保留为待初评样本。</td>
+            </tr>
+            <tr>
+              <td><div class="cell-title">沙特数据合规认证</div><div class="cell-sub">利雅得市场本地化合规要求较高</div></td>
+              <td><span class="tag tag-teal">软件销售</span></td>
+              <td>出行BG</td>
+              <td><span class="tag tag-green">通过</span></td>
+              <td><span class="tag tag-blue">待初评</span></td>
+              <td style="color:var(--text-muted);">-</td>
+              <td>建议重点补齐本地数据存储与认证成本测算。</td>
+            </tr>
+            <tr>
+              <td><div class="cell-title">印尼巴厘岛地接社合作</div><div class="cell-sub">展会接触，当地前三地接社之一</div></td>
+              <td><span class="tag tag-purple">供应链整合</span></td>
+              <td>度假BG</td>
+              <td><span class="tag tag-gray">待筛查</span></td>
+              <td><span class="tag tag-gray">待初评</span></td>
+              <td style="color:var(--text-muted);">-</td>
+              <td>保留在线索转评估的静态展示队列中。</td>
+            </tr>
+            <tr>
+              <td><div class="cell-title">韩国首尔并购标的</div><div class="cell-sub">尽调发现重大法律与数据合规风险</div></td>
+              <td><span class="tag tag-orange">投并购标的</span></td>
+              <td>战投部</td>
+              <td><span class="tag tag-red">不通过</span></td>
+              <td><span class="tag tag-red">终止</span></td>
+              <td style="color:var(--text-muted);">-</td>
+              <td>筛查不通过，已沉淀为终止样本，不再提供重启入口。</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="grid-2 section">
+        <div class="info-panel">
+          <div class="panel-title">六维初评观察点</div>
+          <div class="list-block">
+            <div class="list-item"><div class="list-item-head"><span class="list-item-title">市场吸引力</span><span class="tag tag-blue">权重 30%</span></div><div class="list-item-copy">看市场规模、增速、政策窗口和竞争强度。</div></div>
+            <div class="list-item"><div class="list-item-head"><span class="list-item-title">业务协同性</span><span class="tag tag-purple">权重 20%</span></div><div class="list-item-copy">看与现有平台、供给、品牌、组织能力的复用程度。</div></div>
+            <div class="list-item"><div class="list-item-head"><span class="list-item-title">财务回报</span><span class="tag tag-green">权重 20%</span></div><div class="list-item-copy">看投入强度、回本周期、利润率与 ROI 区间。</div></div>
+            <div class="list-item"><div class="list-item-head"><span class="list-item-title">合规与执行风险</span><span class="tag tag-red">权重 30%</span></div><div class="list-item-copy">看牌照、数据合规、股权限制、整合难度与外部依赖。</div></div>
+          </div>
+        </div>
+
+        <div class="info-panel">
+          <div class="panel-title">代表性结论</div>
+          <div class="timeline">
+            <div class="timeline-item">
+              <div class="timeline-date mono">样本 A</div>
+              <div class="timeline-title">日本关西地区酒店直签</div>
+              <div class="timeline-copy">市场成熟度高，供给获取确定性强，适合作为高确定性推进样本。</div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-date mono">样本 B</div>
+              <div class="timeline-title">泰国本土OTA收购</div>
+              <div class="timeline-copy">战略价值高，但仍依赖估值、JV 架构与监管审查的进一步确认。</div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-date mono">样本 C</div>
+              <div class="timeline-title">韩国首尔并购标的</div>
+              <div class="timeline-copy">法律与数据合规障碍过大，保留为典型反例供后续评估复盘参考。</div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>
