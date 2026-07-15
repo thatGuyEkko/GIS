@@ -6,7 +6,7 @@
   }
 
   const pageType = pageRoot.dataset.bpPage;
-  const bpCode = pageRoot.dataset.bpCode || "";
+  const bpCode = resolveBpCode(pageRoot);
   const dataPrefix = pageType === "detail" ? "../data" : "data";
   const tagPalette = ["blue", "purple", "teal", "green", "orange", "gray"];
   const groupLabels = {
@@ -310,7 +310,7 @@
       '    <tbody>',
       store.mains.map(function (item) {
         const tags = store.tagsByCode.get(item.bp_code) || {};
-        const detailPath = "bp-details/" + item.bp_code.toLowerCase() + ".html";
+        const detailPath = "bp-details/index.html?bp_code=" + encodeURIComponent(item.bp_code);
 
         return [
           '<tr>',
@@ -479,6 +479,25 @@
       '  </div>',
       '</section>'
     ].join("");
+  }
+
+  function resolveBpCode(root) {
+    if (pageType !== "detail") {
+      return root.dataset.bpCode || "";
+    }
+
+    try {
+      const url = new URL(window.location.href);
+      const searchCode = (url.searchParams.get("bp_code") || "").trim();
+
+      if (searchCode) {
+        return searchCode.toUpperCase();
+      }
+    } catch (error) {
+      return root.dataset.bpCode || "";
+    }
+
+    return root.dataset.bpCode || "";
   }
 
   function summarizeStages(stages) {
