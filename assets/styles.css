@@ -583,6 +583,19 @@ tbody tr:last-child td {
   min-width: 1680px;
 }
 
+.wide-table-xl {
+  min-width: 1800px;
+}
+
+.attachment-link {
+  color: var(--blue);
+  word-break: break-all;
+}
+
+.attachment-link:hover {
+  text-decoration: underline;
+}
+
 .tag-row,
 .page-meta {
   display: flex;
@@ -955,6 +968,37 @@ tbody tr:last-child td {
   font-size: 12px;
   color: var(--text-sub);
   line-height: 1.7;
+}
+
+.page-state {
+  padding: 22px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.page-state-error {
+  border-color: #efc8c6;
+  background: #fff7f7;
+}
+
+.page-state-title {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.page-state-copy,
+.page-state-detail,
+.empty-note {
+  font-size: 12px;
+  color: var(--text-sub);
+  line-height: 1.7;
+}
+
+.page-state-detail {
+  margin-top: 8px;
+  color: var(--text-muted);
 }
 
 .foot-note {
