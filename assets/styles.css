@@ -551,6 +551,20 @@ td {
   color: var(--text);
 }
 
+td.amount-positive {
+  color: var(--green);
+  font-weight: 600;
+}
+
+td.amount-negative {
+  color: var(--red);
+  font-weight: 600;
+}
+
+td.amount-neutral {
+  color: var(--text-muted);
+}
+
 tbody tr:last-child td {
   border-bottom: none;
 }

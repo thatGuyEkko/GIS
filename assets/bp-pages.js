@@ -200,12 +200,10 @@
         stage_summary: row.stage_summary,
         period_start_date: row.period_start_date,
         period_end_date: row.period_end_date,
-        rent_investment_amount: toNumber(row.rent_investment_amount),
         fixed_investment_amount: toNumber(row.fixed_investment_amount),
         sales_investment_amount: toNumber(row.sales_investment_amount),
         expected_gmv_amount: toNumber(row.expected_gmv_amount),
         expected_profit_amount: toNumber(row.expected_profit_amount),
-        stage_roi_percent: toNumber(row.stage_roi_percent),
         cumulative_cashflow_amount: toNumber(row.cumulative_cashflow_amount),
         sales_cost_positive_flag: String(row.sales_cost_positive_flag).toLowerCase() === "true",
       });
@@ -389,8 +387,8 @@
       '</div>',
       '<section class="metrics metrics-5">',
       buildMetricCard("整个BP的GMV", formatAmount(totals.totalGmv), "purple", "按 bp_stage 的 expected_gmv_amount 汇总"),
-      buildMetricCard("整个BP的资金投入", formatAmount(totals.totalInvestment), "blue", "租金、固定投入、销售投入合计"),
-      buildMetricCard("整个BP的ROI", formatRatio(totals.overallRoi), "green", "累计利润 / 累计投入"),
+      buildMetricCard("整个BP的资金投入", formatAmount(totals.totalInvestment), "blue", "固定资金投入与销售投入合计"),
+      buildMetricCard("整个BP的ROI", formatRatio(totals.overallRoi), "green", "累计预计利润 / -(累计销售投入 + 累计固定资金投入)"),
       buildMetricCard("销售成本打正周期", formatStageMilestone(salesPositiveStage), "orange", salesPositiveStage ? ("截至 " + salesPositiveStage.period_end_date + " 首次打正") : "当前阶段数据中尚未打正"),
       buildMetricCard("累计现金流打正周期", formatStageMilestone(cashPositiveStage), "teal", cashPositiveStage ? ("截至 " + cashPositiveStage.period_end_date + " 累计现金流转正") : "当前阶段数据中尚未转正"),
       '</section>',
@@ -428,7 +426,6 @@
       '        <th style="width:220px;">阶段主题</th>',
       '        <th style="width:280px;">阶段简要说明</th>',
       '        <th style="width:180px;">期间启止日期</th>',
-      '        <th style="width:120px;">期间租金投入</th>',
       '        <th style="width:120px;">固定资金投入</th>',
       '        <th style="width:120px;">销售投入</th>',
       '        <th style="width:140px;">预计销售额GMV</th>',
@@ -440,23 +437,24 @@
       '    </thead>',
       '    <tbody>',
       (stages.length ? stages : []).map(function (stage) {
+        const stageRoi = calculateStageRoi(stage);
+
         return [
           '<tr>',
           '  <td>' + escapeHtml(stage.stage_name) + '</td>',
           '  <td>' + escapeHtml(stage.stage_topic) + '</td>',
           '  <td>' + escapeHtml(stage.stage_summary) + '</td>',
           '  <td class="mono">' + escapeHtml(stage.period_start_date + ' 至 ' + stage.period_end_date) + '</td>',
-          '  <td class="mono">' + escapeHtml(formatAmount(stage.rent_investment_amount)) + '</td>',
-          '  <td class="mono">' + escapeHtml(formatAmount(stage.fixed_investment_amount)) + '</td>',
-          '  <td class="mono">' + escapeHtml(formatAmount(stage.sales_investment_amount)) + '</td>',
+          '  <td class="mono ' + escapeHtml(getSignedAmountClass(stage.fixed_investment_amount)) + '">' + escapeHtml(formatAmount(stage.fixed_investment_amount)) + '</td>',
+          '  <td class="mono ' + escapeHtml(getSignedAmountClass(stage.sales_investment_amount)) + '">' + escapeHtml(formatAmount(stage.sales_investment_amount)) + '</td>',
           '  <td class="mono">' + escapeHtml(formatAmount(stage.expected_gmv_amount)) + '</td>',
           '  <td class="mono">' + escapeHtml(formatAmount(stage.expected_profit_amount)) + '</td>',
-          '  <td>' + escapeHtml(formatPercentValue(stage.stage_roi_percent)) + '</td>',
+          '  <td>' + escapeHtml(formatPercentValue(stageRoi)) + '</td>',
           '  <td class="mono">' + escapeHtml(formatAmount(stage.cumulative_cashflow_amount)) + '</td>',
           '  <td>' + renderBooleanTag(stage.sales_cost_positive_flag) + '</td>',
           '</tr>'
         ].join("");
-      }).join("") || '<tr><td colspan="12" class="empty-note">暂无阶段数据</td></tr>',
+      }).join("") || '<tr><td colspan="11" class="empty-note">暂无阶段数据</td></tr>',
       '    </tbody>',
       '  </table>',
       '</section>',
@@ -505,7 +503,7 @@
       return sum + stage.expected_gmv_amount;
     }, 0);
     const totalInvestment = stages.reduce(function (sum, stage) {
-      return sum + stage.rent_investment_amount + stage.fixed_investment_amount + stage.sales_investment_amount;
+      return sum + stage.fixed_investment_amount + stage.sales_investment_amount;
     }, 0);
     const totalProfit = stages.reduce(function (sum, stage) {
       return sum + stage.expected_profit_amount;
@@ -515,8 +513,18 @@
       totalGmv: totalGmv,
       totalInvestment: totalInvestment,
       totalProfit: totalProfit,
-      overallRoi: totalInvestment === 0 ? null : totalProfit / totalInvestment,
+      overallRoi: totalInvestment === 0 ? null : totalProfit / -totalInvestment,
     };
+  }
+
+  function calculateStageRoi(stage) {
+    const totalCost = stage.sales_investment_amount + stage.fixed_investment_amount;
+
+    if (totalCost === 0) {
+      return null;
+    }
+
+    return (stage.expected_profit_amount / -totalCost) * 100;
   }
 
   function countByStatus(items) {
@@ -602,6 +610,7 @@
       已通过: "green",
       审批中: "orange",
       草稿: "gray",
+      未通过: "red",
       已驳回: "red",
     };
     const color = colorMap[status] || "blue";
@@ -648,6 +657,18 @@
     }
 
     return formatPercentValue(value * 100);
+  }
+
+  function getSignedAmountClass(value) {
+    if (value > 0) {
+      return "amount-positive";
+    }
+
+    if (value < 0) {
+      return "amount-negative";
+    }
+
+    return "amount-neutral";
   }
 
   function formatPercentValue(value) {

@@ -1,4 +1,4 @@
-bp_code,display_order,stage_name,stage_topic,stage_summary,period_start_date,period_end_date,rent_investment_amount,fixed_investment_amount,sales_investment_amount,expected_gmv_amount,expected_profit_amount,stage_roi_percent,cumulative_cashflow_amount,sales_cost_positive_flag
-2026-1-US,1,冷启动,小规模验证跑通盈利模型,以华人留学生为种子用户，在低成本投入下验证“获客-转化-二次消费-盈利”闭环；依托校园场景、机票盲盒、集团机酒供应链与 TicketNetwork 白标资源完成冷启动。,2026Q3,2027Q1,,-400000,-750000,6000000,1100000,,-50000,FALSE
-2026-1-US,2,成长期,供应链建设,将已验证打法复制至全美高校，自建本地玩乐与小交通直采供应链，形成高毛利护城河，并利用溢出流量灰度验证美国本土市场能力。,2027Q2,2027Q4,,-440000,-1400000,11000000,2000000,,140000,TRUE
-2026-1-US,3,拓展期,破圈进入美国主流市场,从“针对华人留学生的旅行玩乐平台”升级为“面向美国本土 Z 世代大学生的主流旅行平台”，依托拉美短途独家供给、Meta 比价流量承接、校园裂变与广告变现打开增长与利润空间。,2028Q1,2028Q4,,-780000,-4000000,30000000,5600000,,1000000,TRUE
+bp_code,display_order,stage_name,stage_topic,stage_summary,period_start_date,period_end_date,fixed_investment_amount,sales_investment_amount,expected_gmv_amount,expected_profit_amount,cumulative_cashflow_amount,sales_cost_positive_flag
+2026-1-US,1,冷启动,小规模验证跑通盈利模型,以华人留学生为种子用户，在低成本投入下验证“获客-转化-二次消费-盈利”闭环；依托校园场景、机票盲盒、集团机酒供应链与 TicketNetwork 白标资源完成冷启动。,2026Q3,2027Q1,-400000,-750000,6000000,1100000,-50000,FALSE
+2026-1-US,2,成长期,供应链建设,将已验证打法复制至全美高校，自建本地玩乐与小交通直采供应链，形成高毛利护城河，并利用溢出流量灰度验证美国本土市场能力。,2027Q2,2027Q4,-440000,-1400000,11000000,2000000,140000,TRUE
+2026-1-US,3,拓展期,破圈进入美国主流市场,从“针对华人留学生的旅行玩乐平台”升级为“面向美国本土 Z 世代大学生的主流旅行平台”，依托拉美短途独家供给、Meta 比价流量承接、校园裂变与广告变现打开增长与利润空间。,2028Q1,2028Q4,-780000,-4000000,30000000,5600000,1000000,TRUE
