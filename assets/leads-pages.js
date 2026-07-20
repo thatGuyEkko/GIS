@@ -67,15 +67,6 @@
     data: [],
   };
 
-  if (window.location.protocol === "file:") {
-    renderState(
-      mount,
-      "请通过本地 HTTP 服务打开页面，浏览器在 file:// 模式下不会允许脚本读取数据。",
-      true
-    );
-    return;
-  }
-
   renderState(mount, "正在读取线索与商机数据...");
 
   loadData()

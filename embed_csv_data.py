@@ -16,11 +16,14 @@ import re
 
 GIS = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(GIS, "data")
-HTMLS = ["index.html", "leads.html", "bp.html"]
+HTMLS = ["index.html", "leads.html", "bp.html", "bp-details/index.html"]
 CSV_FILES = {
     "/data/leads.csv": "leads.csv",
     "/data/opportunities.csv": "opportunities.csv",
     "/data/bp_main.csv": "bp_main.csv",
+    "/data/bp_tag.csv": "bp_tag.csv",
+    "/data/bp_stage.csv": "bp_stage.csv",
+    "/data/bp_attachment.csv": "bp_attachment.csv",
 }
 
 

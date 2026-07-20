@@ -24,15 +24,6 @@
     "core_customer",
   ];
 
-  if (window.location.protocol === "file:") {
-    renderState(
-      pageRoot,
-      "请通过本地 HTTP 服务打开页面，浏览器在 file:// 模式下不会允许脚本读取 CSV 数据。",
-      true
-    );
-    return;
-  }
-
   renderState(pageRoot, "正在读取 BP 数据...");
 
   Promise.all([
