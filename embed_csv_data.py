@@ -4,8 +4,9 @@
 把 data/*.csv 内联进 index.html / leads.html / bp.html，并注入 fetch 垫片。
 
 效果：
-- 双击 file:// 打开：浏览器禁止 fetch 本地文件 -> 自动回退到内联数据 -> 正常显示
-- 经 serve.py 打开：fetch 成功 -> 使用最新 CSV（内联仅作离线兜底）
+- 双击 file:// 打开：浏览器对本地文件 fetch 返回 404（resolved 而非 reject）-> 自动回退到内联数据 -> 正常显示
+- 经 serve.py 打开：fetch 成功（HTTP 2xx）-> 使用最新 CSV（内联仅作离线兜底）
+- 服务挂掉 / 网络错误：fetch reject -> 同样回退内联
 
 重跑本脚本即可用最新 CSV 刷新内联数据。
 """
@@ -37,20 +38,29 @@ def build_block():
         "window.__OOMS_EMBED = " + emb_json + ";\n"
         "(function(){\n"
         "  var real = window.fetch ? window.fetch.bind(window) : null;\n"
+        "  function embed(key) {\n"
+        "    if (window.__OOMS_EMBED && Object.prototype.hasOwnProperty.call(window.__OOMS_EMBED, key)) {\n"
+        "      return new Response(window.__OOMS_EMBED[key], {status:200, headers:{'Content-Type':'text/csv;charset=utf-8'}});\n"
+        "    }\n"
+        "    return null;\n"
+        "  }\n"
         "  window.fetch = function(u, o){\n"
         "    var key = (typeof u === 'string') ? u : (u && u.url);\n"
-        "    if (real) {\n"
-        "      return real(u, o).catch(function(err){\n"
-        "        if (window.__OOMS_EMBED && Object.prototype.hasOwnProperty.call(window.__OOMS_EMBED, key)) {\n"
-        "          return new Response(window.__OOMS_EMBED[key], {status:200, headers:{'Content-Type':'text/csv;charset=utf-8'}});\n"
-        "        }\n"
-        "        throw err;\n"
-        "      });\n"
+        "    if (!real) {\n"
+        "      var e0 = embed(key);\n"
+        "      if (e0) return Promise.resolve(e0);\n"
+        "      return Promise.reject(new Error('fetch unavailable and no embedded data for ' + key));\n"
         "    }\n"
-        "    if (window.__OOMS_EMBED && Object.prototype.hasOwnProperty.call(window.__OOMS_EMBED, key)) {\n"
-        "      return Promise.resolve(new Response(window.__OOMS_EMBED[key], {status:200, headers:{'Content-Type':'text/csv;charset=utf-8'}}));\n"
-        "    }\n"
-        "    return Promise.reject(new Error('fetch unavailable and no embedded data for ' + key));\n"
+        "    return real(u, o).then(function(resp){\n"
+        "      if (resp.ok) return resp;            // HTTP 2xx：使用真实最新数据\n"
+        "      var e1 = embed(key);                 // 非 2xx（如 file:// 下 404）：回退内联\n"
+        "      if (e1) return e1;\n"
+        "      return resp;                         // 无内联，原样交给调用方报错\n"
+        "    }).catch(function(err){\n"
+        "      var e2 = embed(key);                 // 网络错误：回退内联\n"
+        "      if (e2) return e2;\n"
+        "      throw err;\n"
+        "    });\n"
         "  };\n"
         "})();\n"
         "</script>\n"
