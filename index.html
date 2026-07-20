@@ -11,7 +11,7 @@
     <aside class="sidebar">
       <div class="brand">
         <div class="brand-name">OOMS 出海数字化</div>
-        <div class="brand-sub">原型已重构为独立页面，仅保留商机主链路的静态展示模块。</div>
+        <div class="brand-sub">原型已重构为独立页面，仅保留商机主链路的实时数据展示模块。</div>
       </div>
       <nav class="nav-group">
         <a class="nav-item active" href="index.html">
@@ -38,103 +38,65 @@
         <div>
           <div class="page-kicker">模块一 / Dashboard</div>
           <h1 class="page-title">商机看板</h1>
-          <p class="page-sub">聚合展示当前商机池、线索转化、区域热度与最近动态。页面不再承载编辑、流转和状态操作，仅作为高层浏览与周会汇报的静态视图。</p>
+          <p class="page-sub">聚合展示当前商机池、线索转化、区域热度与最近动态。数据实时读取自 data/ 下的 CSV，页面不再承载编辑、流转和状态操作，仅作为高层浏览与周会汇报的实时数据视图。</p>
         </div>
         <div class="head-aside">
           <div class="summary-card">
             <div class="summary-label">当前样本口径</div>
-            <div class="summary-value mono">2026.07</div>
-            <div class="summary-meta">覆盖 14 个在管商机、8 条线索、5 份 BP</div>
+            <div class="summary-value mono">实时</div>
+            <div class="summary-meta" id="summary-meta">加载中…</div>
           </div>
         </div>
       </div>
 
+      <div id="board-error" style="display:none;margin:0 0 16px;padding:12px 16px;border-radius:10px;background:rgba(229,72,77,.12);color:#e5484d;font-size:13px;"></div>
+
       <section class="metrics">
         <div class="metric-card">
           <div class="metric-label">在管商机</div>
-          <div class="metric-value" style="color:var(--purple);">14</div>
-          <div class="metric-sub">较上月 +2，东南亚占比 57%</div>
+          <div class="metric-value" style="color:var(--purple);"><span id="m-open">–</span></div>
+          <div class="metric-sub" id="sub-open">实时读取 opportunities.csv</div>
         </div>
         <div class="metric-card">
           <div class="metric-label">线索池</div>
-          <div class="metric-value" style="color:var(--blue);">8</div>
-          <div class="metric-sub">本周新增 2，待认领 4</div>
+          <div class="metric-value" style="color:var(--blue);"><span id="m-leads">–</span></div>
+          <div class="metric-sub">本周新增与待认领以 CSV 为准</div>
         </div>
         <div class="metric-card">
           <div class="metric-label">评估中项目</div>
-          <div class="metric-value" style="color:var(--orange);">4</div>
-          <div class="metric-sub">3 个待初评，1 个复核中</div>
+          <div class="metric-value" style="color:var(--orange);"><span id="m-eval">–</span></div>
+          <div class="metric-sub" id="sub-eval"></div>
         </div>
         <div class="metric-card">
-          <div class="metric-label">本月完成</div>
-          <div class="metric-value" style="color:var(--green);">2</div>
-          <div class="metric-sub">静态转化率 37%，平均周期 6.5 周</div>
+          <div class="metric-label">已完成</div>
+          <div class="metric-value" style="color:var(--green);"><span id="m-done">–</span></div>
+          <div class="metric-sub">状态为「已完成」的商机数</div>
         </div>
       </section>
 
       <section class="charts section">
         <div class="chart-box">
           <div class="chart-title">线索来源分布</div>
-          <div class="bar-list">
-            <div class="bar-row"><span class="bar-label">内部数据扫描</span><div class="bar-track"><div class="bar-fill" style="width:100%;background:var(--blue);"></div></div><span class="bar-value">4</span></div>
-            <div class="bar-row"><span class="bar-label">合作伙伴接触</span><div class="bar-track"><div class="bar-fill" style="width:75%;background:var(--teal);"></div></div><span class="bar-value">3</span></div>
-            <div class="bar-row"><span class="bar-label">海外团队反馈</span><div class="bar-track"><div class="bar-fill" style="width:50%;background:var(--green);"></div></div><span class="bar-value">2</span></div>
-            <div class="bar-row"><span class="bar-label">投行/FA推介</span><div class="bar-track"><div class="bar-fill" style="width:50%;background:var(--orange);"></div></div><span class="bar-value">2</span></div>
-            <div class="bar-row"><span class="bar-label">竞品监控</span><div class="bar-track"><div class="bar-fill" style="width:25%;background:var(--purple);"></div></div><span class="bar-value">1</span></div>
-            <div class="bar-row"><span class="bar-label">政策驱动</span><div class="bar-track"><div class="bar-fill" style="width:25%;background:var(--red);"></div></div><span class="bar-value">1</span></div>
-          </div>
-          <div class="chart-note">线索来源已固化为展示数据，不提供来源编辑和刷新行为。</div>
+          <div class="bar-list" id="src-lead-source"></div>
+          <div class="chart-note">数据实时读取自 leads.csv，按「来源」枚举聚合。</div>
         </div>
 
         <div class="chart-box">
-          <div class="chart-title">线索转化趋势</div>
-          <div class="funnel">
-            <div class="funnel-step top">
-              <div class="funnel-label" style="color:var(--blue);">线索池</div>
-              <div class="funnel-value" style="color:var(--blue);">8</div>
-            </div>
-            <div class="funnel-arrow blue"></div>
-            <div class="funnel-step mid-a">
-              <div class="funnel-label" style="color:var(--purple);">初评/筛查</div>
-              <div class="funnel-value" style="color:var(--purple);">4</div>
-            </div>
-            <div class="funnel-arrow purple"></div>
-            <div class="funnel-step mid-b">
-              <div class="funnel-label" style="color:var(--orange);">深评/尽调</div>
-              <div class="funnel-value" style="color:var(--orange);">4</div>
-            </div>
-            <div class="funnel-arrow orange"></div>
-            <div class="funnel-step bottom">
-              <div class="funnel-label" style="color:var(--green);">推进中</div>
-              <div class="funnel-value" style="color:var(--green);">5</div>
-            </div>
-          </div>
-          <div class="chart-note">样本口径固定：转化率 37%，平均评估周期 6.5 周。</div>
+          <div class="chart-title">商机转化漏斗</div>
+          <div class="funnel" id="funnel"></div>
+          <div class="chart-note">实时按 在管商机 → 推进中 → 已完成 商机生命周期聚合。线索池见上方指标卡（商机可独立录入，不全部源自线索池）。</div>
         </div>
       </section>
 
       <section class="charts section">
         <div class="chart-box">
           <div class="chart-title">商机类型分布</div>
-          <div class="bar-list">
-            <div class="bar-row"><span class="bar-label">供应链整合</span><div class="bar-track"><div class="bar-fill" style="width:100%;background:var(--purple);"></div></div><span class="bar-value">5</span></div>
-            <div class="bar-row"><span class="bar-label">OTA平台业务</span><div class="bar-track"><div class="bar-fill" style="width:80%;background:var(--blue);"></div></div><span class="bar-value">4</span></div>
-            <div class="bar-row"><span class="bar-label">酒店管理</span><div class="bar-track"><div class="bar-fill" style="width:80%;background:var(--gray);"></div></div><span class="bar-value">4</span></div>
-            <div class="bar-row"><span class="bar-label">投并购标的</span><div class="bar-track"><div class="bar-fill" style="width:40%;background:var(--orange);"></div></div><span class="bar-value">2</span></div>
-            <div class="bar-row"><span class="bar-label">支付金融</span><div class="bar-track"><div class="bar-fill" style="width:20%;background:var(--green);"></div></div><span class="bar-value">1</span></div>
-            <div class="bar-row"><span class="bar-label">软件销售</span><div class="bar-track"><div class="bar-fill" style="width:20%;background:var(--teal);"></div></div><span class="bar-value">1</span></div>
-          </div>
+          <div class="bar-list" id="src-opp-type"></div>
         </div>
 
         <div class="chart-box">
           <div class="chart-title">商机BG归属分布</div>
-          <div class="bar-list">
-            <div class="bar-row"><span class="bar-label">酒店BG</span><div class="bar-track"><div class="bar-fill" style="width:100%;background:var(--purple);"></div></div><span class="bar-value">6</span></div>
-            <div class="bar-row"><span class="bar-label">出行BG</span><div class="bar-track"><div class="bar-fill" style="width:67%;background:var(--blue);"></div></div><span class="bar-value">4</span></div>
-            <div class="bar-row"><span class="bar-label">度假BG</span><div class="bar-track"><div class="bar-fill" style="width:50%;background:var(--teal);"></div></div><span class="bar-value">3</span></div>
-            <div class="bar-row"><span class="bar-label">战投部</span><div class="bar-track"><div class="bar-fill" style="width:33%;background:var(--orange);"></div></div><span class="bar-value">2</span></div>
-            <div class="bar-row"><span class="bar-label">中台</span><div class="bar-track"><div class="bar-fill" style="width:33%;background:var(--gray);"></div></div><span class="bar-value">2</span></div>
-          </div>
+          <div class="bar-list" id="src-opp-bg"></div>
         </div>
       </section>
 
@@ -142,7 +104,7 @@
         <div class="section-head">
           <div>
             <div class="section-title">全球商机分布</div>
-            <div class="section-sub">用静态区域热度表现国家覆盖，不再跳转详情和触发状态动作。</div>
+            <div class="section-sub">按「目标国家/城市」实时聚合，气泡大小代表商机数量。</div>
           </div>
         </div>
 
@@ -153,57 +115,25 @@
             <div class="map-region" style="top:18px;right:34px;">中东</div>
             <div class="map-region" style="bottom:56px;left:24px;">南美</div>
 
-            <div class="map-bubble" style="top:16%;left:50%;">
-              <div class="bubble-dot bubble-lg tag-purple">5</div>
-              <div class="bubble-label" style="color:var(--purple);">日本</div>
-            </div>
-            <div class="map-bubble" style="top:38%;left:32%;">
-              <div class="bubble-dot bubble-md tag-purple">4</div>
-              <div class="bubble-label" style="color:var(--purple);">泰国</div>
-            </div>
-            <div class="map-bubble" style="top:42%;left:53%;">
-              <div class="bubble-dot bubble-sm tag-blue">3</div>
-              <div class="bubble-label" style="color:var(--blue);">越南</div>
-            </div>
-            <div class="map-bubble" style="top:50%;left:24%;">
-              <div class="bubble-dot bubble-sm tag-orange">2</div>
-              <div class="bubble-label" style="color:var(--orange);">印尼</div>
-            </div>
-            <div class="map-bubble" style="top:67%;left:16%;">
-              <div class="bubble-dot bubble-sm tag-orange">2</div>
-              <div class="bubble-label" style="color:var(--orange);">巴西</div>
-            </div>
-            <div class="map-bubble" style="top:26%;left:79%;">
-              <div class="bubble-dot bubble-xs tag-red">1</div>
-              <div class="bubble-label" style="color:var(--red);">沙特</div>
-            </div>
-            <div class="map-bubble" style="top:13%;left:63%;">
-              <div class="bubble-dot bubble-xs tag-gray">1</div>
-              <div class="bubble-label" style="color:var(--text-muted);">韩国</div>
-            </div>
+            <div id="map-bubbles" style="position:absolute;inset:0;"></div>
 
             <div class="map-legend">
-              <span class="legend-item"><span class="legend-dot" style="background:var(--purple);"></span>活跃(4+)</span>
-              <span class="legend-item"><span class="legend-dot" style="background:var(--blue);"></span>评估中(3)</span>
-              <span class="legend-item"><span class="legend-dot" style="background:var(--orange);"></span>观察(2)</span>
-              <span class="legend-item"><span class="legend-dot" style="background:var(--red);"></span>高风险(1)</span>
+              <span class="legend-item"><span class="legend-dot" style="background:var(--purple);"></span><span id="lg-prog">推进中</span></span>
+              <span class="legend-item"><span class="legend-dot" style="background:var(--blue);"></span><span id="lg-open">在管</span></span>
+              <span class="legend-item"><span class="legend-dot" style="background:var(--orange);"></span><span id="lg-watch">观望/暂停</span></span>
+              <span class="legend-item"><span class="legend-dot" style="background:var(--green);"></span><span id="lg-done">已完成</span></span>
             </div>
           </div>
 
           <div class="stack">
             <div class="info-panel">
               <div class="panel-title">区域关注清单</div>
-              <div class="map-list">
-                <div class="map-list-item"><div><div class="map-list-name">日本</div><div class="map-list-note">酒店直签与管理合作并行</div></div><div class="bar-track"><div class="bar-fill" style="width:100%;background:var(--purple);"></div></div><div class="map-list-score">5</div></div>
-                <div class="map-list-item"><div><div class="map-list-name">泰国</div><div class="map-list-note">收购与供应链整合双线推进</div></div><div class="bar-track"><div class="bar-fill" style="width:80%;background:var(--purple);"></div></div><div class="map-list-score">4</div></div>
-                <div class="map-list-item"><div><div class="map-list-name">越南</div><div class="map-list-note">开站机会明确，政策窗口稳定</div></div><div class="bar-track"><div class="bar-fill" style="width:60%;background:var(--blue);"></div></div><div class="map-list-score">3</div></div>
-                <div class="map-list-item"><div><div class="map-list-name">巴西</div><div class="map-list-note">支付与酒店供给存在结构性缺口</div></div><div class="bar-track"><div class="bar-fill" style="width:40%;background:var(--orange);"></div></div><div class="map-list-score">2</div></div>
-              </div>
+              <div class="map-list" id="region-list"></div>
             </div>
 
             <div class="note-card">
               <div class="note-title">页面裁剪说明</div>
-              <div class="note-copy">原型中的问卷、财务预测、合规管理、系统设置等模块已从主导航移除。当前看板只承接商机管理主链路的聚合信息展示。</div>
+              <div class="note-copy">原型中的问卷、财务预测、合规管理、系统设置等模块已从主导航移除。当前看板只承接商机管理主链路的聚合信息展示，数据全部来自 CSV。</div>
             </div>
           </div>
         </div>
@@ -219,41 +149,12 @@
               <th style="width:220px;">说明</th>
             </tr>
           </thead>
-          <tbody>
-            <tr>
-              <td class="mono" style="color:var(--text-muted);">07-01 10:22</td>
-              <td><div class="cell-title">印尼巴厘岛地接社合作</div><div class="cell-sub">度假BG 展会接触样本</div></td>
-              <td><span class="tag tag-blue">新建线索</span></td>
-              <td>进入线索池，待后续业务认领与评估排期。</td>
-            </tr>
-            <tr>
-              <td class="mono" style="color:var(--text-muted);">06-30 16:22</td>
-              <td><div class="cell-title">日本关西地区酒店直签</div><div class="cell-sub">酒店BG / 供应链整合</div></td>
-              <td><span class="tag tag-orange">筛查通过</span></td>
-              <td>三关筛查通过，已纳入初评结果展示样本。</td>
-            </tr>
-            <tr>
-              <td class="mono" style="color:var(--text-muted);">06-29 11:05</td>
-              <td><div class="cell-title">越南胡志明市开站</div><div class="cell-sub">出行BG / OTA 平台业务</div></td>
-              <td><span class="tag tag-green">深评完成</span></td>
-              <td>综合得分 3.8，作为推荐推进样本展示。</td>
-            </tr>
-            <tr>
-              <td class="mono" style="color:var(--text-muted);">06-28 14:50</td>
-              <td><div class="cell-title">泰国本土OTA收购</div><div class="cell-sub">战投部 / 投并购标的</div></td>
-              <td><span class="tag tag-orange">进入尽调</span></td>
-              <td>JV 架构方案完成，进入尽调阶段资料整理。</td>
-            </tr>
-            <tr>
-              <td class="mono" style="color:var(--text-muted);">06-28 09:15</td>
-              <td><div class="cell-title">巴西圣保罗酒店供给缺口</div><div class="cell-sub">中台数据扫描发现</div></td>
-              <td><span class="tag tag-gray">线索录入</span></td>
-              <td>作为市场扫描样本保留在线索池展示中。</td>
-            </tr>
+          <tbody id="recent-tbody">
           </tbody>
         </table>
       </section>
     </main>
   </div>
+  <script src="assets/board-pages.js" defer></script>
 </body>
 </html>

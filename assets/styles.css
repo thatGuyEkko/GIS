@@ -864,6 +864,31 @@ tbody tr:last-child td {
   gap: 6px;
 }
 
+.item-card-attach {
+  margin-top: 8px;
+  font-size: 11px;
+  line-height: 1.7;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.attach-label {
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.attach-text {
+  color: var(--text-muted);
+  word-break: break-all;
+}
+
+.cell-attach {
+  font-size: 11px;
+  line-height: 1.6;
+}
+
 .flow-grid {
   display: grid;
   grid-template-columns: 1.05fr 1fr;
@@ -1093,3 +1118,4 @@ tbody tr:last-child td {
     padding: 12px 10px;
   }
 }
+

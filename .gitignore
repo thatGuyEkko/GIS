@@ -1,0 +1,17 @@
+# macOS metadata
+.DS_Store
+**/.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Editor / OS
+*.swp
+*~
+
+# Local preview / workflow artifacts (outside GIS)
+# OOMS_workflow 为独立工作流目录，不随 GIS 提交
+OOMS_workflow/
