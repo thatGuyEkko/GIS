@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OOMS | 商机看板</title>
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body class="content-page">
+  <main class="content">
+    <div class="page-head">
+      <div>
+        <div class="page-kicker">模块一 / Dashboard</div>
+        <h1 class="page-title">商机看板</h1>
+        <p class="page-sub">聚合展示当前商机池、线索转化、区域热度与最近动态。数据实时读取自 data/ 下的 CSV，页面不再承载编辑、流转和状态操作，仅作为高层浏览与周会汇报的实时数据视图。</p>
+      </div>
+      <div class="head-aside">
+        <div class="summary-card">
+          <div class="summary-label">当前样本口径</div>
+          <div class="summary-value mono">实时</div>
+          <div class="summary-meta" id="summary-meta">加载中…</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="board-error" style="display:none;margin:0 0 16px;padding:12px 16px;border-radius:10px;background:rgba(229,72,77,.12);color:#e5484d;font-size:13px;"></div>
+
+    <section class="metrics">
+      <div class="metric-card">
+        <div class="metric-label">在管商机</div>
+        <div class="metric-value" style="color:var(--purple);"><span id="m-open">–</span></div>
+        <div class="metric-sub" id="sub-open">实时读取 opportunities.csv</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">线索池</div>
+        <div class="metric-value" style="color:var(--blue);"><span id="m-leads">–</span></div>
+        <div class="metric-sub">本周新增与待认领以 CSV 为准</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">评估中项目</div>
+        <div class="metric-value" style="color:var(--orange);"><span id="m-eval">–</span></div>
+        <div class="metric-sub" id="sub-eval"></div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">已完成</div>
+        <div class="metric-value" style="color:var(--green);"><span id="m-done">–</span></div>
+        <div class="metric-sub">状态为「已完成」的商机数</div>
+      </div>
+    </section>
+
+    <section class="charts section">
+      <div class="chart-box">
+        <div class="chart-title">线索来源分布</div>
+        <div class="bar-list" id="src-lead-source"></div>
+        <div class="chart-note">数据实时读取自 leads.csv，按「来源」枚举聚合。</div>
+      </div>
+
+      <div class="chart-box">
+        <div class="chart-title">商机转化漏斗</div>
+        <div class="funnel" id="funnel"></div>
+        <div class="chart-note">实时按 在管商机 → 推进中 → 已完成 商机生命周期聚合。线索池见上方指标卡（商机可独立录入，不全部源自线索池）。</div>
+      </div>
+    </section>
+
+    <section class="charts section">
+      <div class="chart-box">
+        <div class="chart-title">商机类型分布</div>
+        <div class="bar-list" id="src-opp-type"></div>
+      </div>
+
+      <div class="chart-box">
+        <div class="chart-title">商机BG归属分布</div>
+        <div class="bar-list" id="src-opp-bg"></div>
+      </div>
+    </section>
+
+    <section class="world-card section">
+      <div class="section-head">
+        <div>
+          <div class="section-title">全球商机分布</div>
+          <div class="section-sub">按「目标国家/城市」实时聚合，气泡大小代表商机数量。</div>
+        </div>
+      </div>
+
+      <div class="world-grid">
+        <div class="map-panel">
+          <div class="map-region" style="top:16px;left:26px;">东亚</div>
+          <div class="map-region" style="top:112px;left:44px;">东南亚</div>
+          <div class="map-region" style="top:18px;right:34px;">中东</div>
+          <div class="map-region" style="bottom:56px;left:24px;">南美</div>
+
+          <div id="map-bubbles" style="position:absolute;inset:0;"></div>
+
+          <div class="map-legend">
+            <span class="legend-item"><span class="legend-dot" style="background:var(--purple);"></span><span id="lg-prog">推进中</span></span>
+            <span class="legend-item"><span class="legend-dot" style="background:var(--blue);"></span><span id="lg-open">在管</span></span>
+            <span class="legend-item"><span class="legend-dot" style="background:var(--orange);"></span><span id="lg-watch">观望/暂停</span></span>
+            <span class="legend-item"><span class="legend-dot" style="background:var(--green);"></span><span id="lg-done">已完成</span></span>
+          </div>
+        </div>
+
+        <div class="stack">
+          <div class="info-panel">
+            <div class="panel-title">区域关注清单</div>
+            <div class="map-list" id="region-list"></div>
+          </div>
+
+          <div class="note-card">
+            <div class="note-title">页面裁剪说明</div>
+            <div class="note-copy">原型中的问卷、财务预测、合规管理、系统设置等模块已从主导航移除。当前看板只承接商机管理主链路的聚合信息展示，数据全部来自 CSV。</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="table-card section">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:130px;">时间</th>
+            <th>商机/线索</th>
+            <th style="width:120px;">节点</th>
+            <th style="width:220px;">说明</th>
+          </tr>
+        </thead>
+        <tbody id="recent-tbody">
+        </tbody>
+      </table>
+    </section>
+  </main>
+  <script src="assets/board-pages.js" defer></script>
+  <script src="assets/content-frame.js" defer></script>
+</body>
+</html>

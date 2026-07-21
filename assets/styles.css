@@ -126,6 +126,35 @@ a {
   transition: margin-left 0.2s ease;
 }
 
+.content-page {
+  min-height: 100vh;
+  background: var(--bg);
+}
+
+.content-page .content {
+  margin-left: 0;
+  min-height: 100vh;
+}
+
+.shell-main {
+  display: block;
+}
+
+.frame-shell {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.content-frame {
+  display: block;
+  width: 100%;
+  min-height: 720px;
+  border: 0;
+  background: var(--bg);
+}
+
 .sidebar-toggle {
   position: absolute;
   top: 20px;
@@ -1518,6 +1547,10 @@ tbody tr:last-child td {
     padding: 24px 18px 40px;
   }
 
+  .content-frame {
+    min-height: 640px;
+  }
+
   .page-head,
   .metrics,
   .grid-2,
@@ -1561,6 +1594,10 @@ tbody tr:last-child td {
 
   .content {
     padding: 20px 14px 32px;
+  }
+
+  .content-frame {
+    min-height: 520px;
   }
 
   .travel-filter-card,

@@ -311,13 +311,11 @@
       '    <tbody>',
       store.mains.map(function (item) {
         const tags = store.tagsByCode.get(item.bp_code) || {};
-        const detailPath = "bp-details/index.html?bp_code=" + encodeURIComponent(item.bp_code);
-
         return [
           '<tr>',
           '  <td class="mono">' + escapeHtml(item.bp_code) + '</td>',
           '  <td>',
-          '    <div class="cell-title"><a class="detail-link" href="' + escapeHtml(detailPath) + '">' + escapeHtml(item.bp_title) + '</a></div>',
+          '    <div class="cell-title"><a class="detail-link" href="bp-details/index.html?bp_code=' + encodeURIComponent(item.bp_code) + '" data-shell-route="bp" data-shell-bp-code="' + escapeHtml(item.bp_code) + '">' + escapeHtml(item.bp_title) + '</a></div>',
           '    <div class="cell-sub">' + escapeHtml(item.list_summary) + '</div>',
           '  </td>',
           '  <td>' + renderTagGroup(tags.related_opportunity || []) + '</td>',
@@ -360,7 +358,7 @@
     document.title = "OOMS | " + main.bp_code;
 
     root.innerHTML = [
-      '<a class="back-link" href="../bp.html">返回 BP 台账</a>',
+      '<a class="back-link" href="../bp.html" data-shell-route="bp">返回 BP 台账</a>',
       '<div class="page-head">',
       '  <div>',
       '    <div class="page-kicker">BP详情 / ' + escapeHtml(main.bp_code) + '</div>',
