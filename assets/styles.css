@@ -1102,20 +1102,14 @@ tbody tr:last-child td {
   background: #ece1f8;
 }
 
-.travel-board {
-  display: grid;
-  grid-template-columns: minmax(0, 1.45fr) minmax(320px, 0.75fr);
-  gap: 18px;
-}
-
 .travel-map-card {
   padding: 18px;
 }
 
 .travel-map-shell {
   position: relative;
-  min-height: 560px;
-  padding: 14px;
+  min-height: 600px;
+  padding: 18px;
   border-radius: 8px;
   background: linear-gradient(180deg, #edf4fb 0%, #f7f2e8 100%);
   border: 1px solid var(--border);
@@ -1200,8 +1194,13 @@ tbody tr:last-child td {
   position: absolute;
   top: 16px;
   right: 16px;
-  width: min(280px, calc(100% - 32px));
-  padding: 14px;
+  z-index: 2;
+  display: grid;
+  gap: 12px;
+  width: min(420px, calc(100% - 32px));
+  max-height: calc(100% - 32px);
+  overflow: auto;
+  padding: 16px;
   background: rgba(255, 255, 255, 0.96);
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -1215,47 +1214,99 @@ tbody tr:last-child td {
   line-height: 1.6;
 }
 
+.travel-hover-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
 .travel-hover-country {
   font-size: 16px;
   font-weight: 600;
+  line-height: 1.3;
   margin-bottom: 4px;
 }
 
 .travel-hover-meta {
   font-size: 11px;
   color: var(--text-muted);
-  margin-bottom: 12px;
 }
 
 .travel-hover-stats {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
-  margin-bottom: 10px;
 }
 
-.travel-hover-stats div {
+.travel-hover-metric {
   padding: 10px;
   border-radius: 8px;
   background: var(--surface-subtle);
+  min-width: 0;
 }
 
-.travel-hover-stats span {
+.travel-hover-metric span {
   display: block;
   font-size: 10px;
   color: var(--text-muted);
   margin-bottom: 4px;
 }
 
-.travel-hover-stats strong {
+.travel-hover-metric strong {
   font-size: 14px;
   font-weight: 600;
+  line-height: 1.4;
+  word-break: break-word;
 }
 
 .travel-hover-copy {
   font-size: 12px;
   color: var(--text-sub);
   line-height: 1.7;
+}
+
+.travel-hover-section {
+  display: grid;
+  gap: 8px;
+}
+
+.travel-hover-section-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.travel-hover-list {
+  display: grid;
+  gap: 8px;
+}
+
+.travel-hover-record {
+  display: grid;
+  gap: 6px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: rgba(245, 241, 234, 0.72);
+}
+
+.travel-hover-record-title {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+.travel-hover-record-meta {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.travel-hover-record-copy {
+  font-size: 12px;
+  color: var(--text-sub);
+  line-height: 1.6;
 }
 
 .travel-map-legend {
@@ -1279,111 +1330,6 @@ tbody tr:last-child td {
   background: var(--orange);
 }
 
-.travel-side-column {
-  display: grid;
-  align-content: start;
-  gap: 18px;
-}
-
-.travel-country-head {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.travel-country-name {
-  font-size: 20px;
-  font-weight: 600;
-  line-height: 1.2;
-  margin-bottom: 4px;
-}
-
-.travel-country-sub {
-  font-size: 12px;
-  color: var(--text-muted);
-}
-
-.travel-key-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.travel-key-item {
-  min-width: 0;
-  padding: 12px;
-  border-radius: 8px;
-  background: var(--surface-subtle);
-}
-
-.travel-key-label {
-  font-size: 11px;
-  color: var(--text-muted);
-  margin-bottom: 6px;
-}
-
-.travel-key-value {
-  font-size: 14px;
-  font-weight: 600;
-  line-height: 1.5;
-}
-
-.travel-country-copy-group {
-  display: grid;
-  gap: 12px;
-}
-
-.travel-country-list {
-  display: grid;
-  gap: 10px;
-}
-
-.travel-country-chip {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 12px;
-  align-items: center;
-  width: 100%;
-  padding: 12px 14px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--surface-subtle);
-  color: var(--text);
-  text-align: left;
-  cursor: pointer;
-}
-
-.travel-country-chip:hover {
-  border-color: #d4cbbe;
-  background: #f7f4ed;
-}
-
-.travel-country-chip.is-active {
-  border-color: #dbc9f0;
-  background: var(--purple-light);
-}
-
-.travel-country-chip-name {
-  display: block;
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.travel-country-chip-meta {
-  display: block;
-  font-size: 11px;
-  color: var(--text-muted);
-}
-
-.foot-note {
-  margin-top: 18px;
-  font-size: 11px;
-  color: var(--text-muted);
-}
-
 @media (max-width: 1280px) {
   .metrics,
   .grid-4 {
@@ -1399,8 +1345,7 @@ tbody tr:last-child td {
   .flow-grid,
   .charts,
   .columns,
-  .grid-3,
-  .travel-board {
+  .grid-3 {
     grid-template-columns: 1fr;
   }
 
@@ -1440,7 +1385,6 @@ tbody tr:last-child td {
   }
 
   .travel-filter-grid,
-  .travel-key-grid,
   .travel-hover-stats {
     grid-template-columns: 1fr;
   }
@@ -1479,18 +1423,13 @@ tbody tr:last-child td {
   }
 
   .travel-filter-grid,
-  .travel-key-grid {
+  .travel-hover-stats {
     grid-template-columns: 1fr;
   }
 
   .travel-map-shell {
     min-height: 420px;
     padding: 10px;
-  }
-
-  .travel-country-chip {
-    grid-template-columns: 1fr;
-    gap: 6px;
   }
 
   th,
