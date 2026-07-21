@@ -5,8 +5,8 @@
     return;
   }
 
-  const LEADS_CSV = "/data/leads.csv";
-  const OPP_CSV = "/data/opportunities.csv";
+  const LEADS_CSV = "data/leads.csv";
+  const OPP_CSV = "data/opportunities.csv";
 
   // 关闭样本由状态判定（与展示约定一致）
   const CLOSED_STATUSES = ["筛查未通过", "初评未通过", "已放弃"];
@@ -75,7 +75,7 @@
       render();
     })
     .catch(function (error) {
-      renderState(mount, "线索数据加载失败，请检查 /data/ 目录下的 leads.csv / opportunities.csv 与本地服务。", true, error);
+      renderState(mount, "线索数据加载失败，请检查 data/ 目录下的 leads.csv / opportunities.csv 与本地服务。", true, error);
     });
 
   function loadData() {
@@ -216,7 +216,7 @@
       '  <div>',
       '    <div class="page-kicker">模块二 / Leads &amp; Opportunities</div>',
       '    <h1 class="page-title">线索商机管理</h1>',
-      '    <p class="page-sub">线索池、推进中的商机以及已关闭样本统一从 /data/leads.csv 与 /data/opportunities.csv 两个模版渲染，页面只读展示，不支持在线编辑。</p>',
+      '    <p class="page-sub">线索池、推进中的商机以及已关闭样本统一从 data/leads.csv 与 data/opportunities.csv 两个模版渲染，页面只读展示，不支持在线编辑。</p>',
       '  </div>',
       '  <div class="head-aside">',
       '    <div class="summary-card">',
