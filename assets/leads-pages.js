@@ -26,33 +26,33 @@
 
   // 线索模版表头 → 数据字段
   const LEAD_HEADERS = {
-    "id": "id",
-    "线索名称": "name",
-    "目标国家/城市": "country",
-    "类型": "type",
-    "归属BG": "bg",
-    "来源": "source",
-    "线索描述": "copy",
-    "附件": "attach",
-    "创建时间": "created",
-    "更新时间": "updated",
+    "id": "记录ID",
+    "name": "线索名称",
+    "country": "目标国家/城市",
+    "type": "类型",
+    "bg": "归属BG",
+    "source": "来源",
+    "copy": "线索描述",
+    "attach": "附件",
+    "created": "创建时间",
+    "updated": "更新时间",
   };
 
   // 商机模版表头 → 数据字段（类型复用于类型枚举）
   const OPP_HEADERS = {
-    "id": "id",
-    "商机名称": "name",
-    "目标国家/城市": "country",
-    "类型": "type",
-    "归属BG": "bg",
-    "来源": "source",
-    "负责人": "owner",
-    "商机评分": "score",
-    "商机描述": "copy",
-    "附件": "attach",
-    "状态": "status",
-    "创建时间": "created",
-    "更新时间": "updated",
+    "id": "记录ID",
+    "name": "商机名称",
+    "country": "目标国家/城市",
+    "type": "类型",
+    "bg": "归属BG",
+    "source": "来源",
+    "owner": "负责人",
+    "score": "商机评分",
+    "copy": "商机描述",
+    "attach": "附件",
+    "status": "状态",
+    "created": "创建时间",
+    "updated": "更新时间",
   };
 
   const statusColor = {
@@ -197,7 +197,7 @@
       });
 
       if (isLead) {
-        obj.status = "待认领";
+        obj["状态"] = "待认领";
       }
 
       return obj;
@@ -205,7 +205,7 @@
   }
 
   function deriveCategory(row) {
-    return CLOSED_STATUSES.indexOf(row["状态"]) >= 0 ? "关闭" : "商机";
+    return CLOSED_STATUSES.indexOf(row["status"]) >= 0 ? "关闭" : "商机";
   }
 
   function render() {
@@ -244,7 +244,7 @@
 
   function buildMetrics(counts) {
     const pendingClaim = state.data.filter(function (item) {
-      return item.category === "线索" && item.status === "待认领";
+      return item.category === "线索" && item["状态"] === "待认领";
     }).length;
 
     return [
@@ -288,31 +288,31 @@
   }
 
   function buildItemCard(item) {
-    const status = statusColor[item.status] || "blue";
-    const type = typeColor[item.type] || "gray";
+    const status = statusColor[item["状态"]] || "blue";
+    const type = typeColor[item["类型"]] || "gray";
 
     const meta = [
-      '<span class="tag tag-' + escapeHtml(status) + '">' + escapeHtml(item.status) + '</span>',
-      '<span class="tag tag-' + escapeHtml(type) + '">' + escapeHtml(item.type) + '</span>',
+      '<span class="tag tag-' + escapeHtml(status) + '">' + escapeHtml(item["状态"]) + '</span>',
+      '<span class="tag tag-' + escapeHtml(type) + '">' + escapeHtml(item["类型"]) + '</span>',
     ];
 
-    if (item.country) {
-      meta.push('<span class="tag tag-blue">' + escapeHtml(item.country) + '</span>');
+    if (item["目标国家/城市"]) {
+      meta.push('<span class="tag tag-blue">' + escapeHtml(item["目标国家/城市"]) + '</span>');
     }
 
-    if (item.bg) {
-      meta.push('<span class="tag tag-gray">' + escapeHtml(item.bg) + '</span>');
+    if (item["归属BG"]) {
+      meta.push('<span class="tag tag-gray">' + escapeHtml(item["归属BG"]) + '</span>');
     }
 
-    if (item.source) {
-      meta.push('<span class="tag tag-teal">来源：' + escapeHtml(item.source) + '</span>');
+    if (item["来源"]) {
+      meta.push('<span class="tag tag-teal">来源：' + escapeHtml(item["来源"]) + '</span>');
     }
 
     return [
       '<div class="item-card">',
-      '  <div class="item-card-title">' + escapeHtml(item.name) + '</div>',
-      '  <div class="item-card-copy">' + escapeHtml(item.copy || "") + '</div>',
-      item.attach ? renderAttachments(item.attach, false) : '',
+      '  <div class="item-card-title">' + escapeHtml(item["线索名称"] || item["商机名称"]) + '</div>',
+      '  <div class="item-card-copy">' + escapeHtml(item["线索描述"] || item["商机描述"] || "") + '</div>',
+      item["附件"] ? renderAttachments(item["附件"], false) : '',
       '  <div class="item-card-meta">' + meta.join("") + '</div>',
       '</div>',
     ].join("");
@@ -321,33 +321,33 @@
   function buildTable() {
     const rows = state.data
       .map(function (item) {
-        const dot = statusColor[item.status] || "gray";
-        const type = typeColor[item.type] || "gray";
-        const status = statusColor[item.status] || "blue";
-        const score = renderScore(item.score);
+        const dot = statusColor[item["状态"]] || "gray";
+        const type = typeColor[item["类型"]] || "gray";
+        const status = statusColor[item["状态"]] || "blue";
+        const score = renderScore(item["商机评分"]);
         const subParts = [];
 
-        if (item.source) {
-          subParts.push("来源：" + item.source);
+        if (item["来源"]) {
+          subParts.push("来源：" + item["来源"]);
         }
 
-        if (item.copy) {
-          subParts.push(item.copy);
+        if (item["线索描述"] || item["商机描述"]) {
+          subParts.push(item["线索描述"] || item["商机描述"]);
         }
 
         return [
           '<tr>',
           '  <td><span class="dot dot-' + escapeHtml(dot) + '"></span></td>',
-          '  <td><div class="cell-title">' + escapeHtml(item.name) + '</div><div class="cell-sub">' + escapeHtml(subParts.join(" · ")) + '</div></td>',
-          '  <td>' + escapeHtml(item.country || "-") + '</td>',
-          '  <td><span class="tag tag-' + escapeHtml(type) + '">' + escapeHtml(item.type || "-") + '</span></td>',
-          '  <td><span class="tag tag-' + escapeHtml(status) + '">' + escapeHtml(item.status) + '</span></td>',
-          '  <td>' + escapeHtml(item.bg || "-") + '</td>',
+          '  <td><div class="cell-title">' + escapeHtml(item["线索名称"] || item["商机名称"]) + '</div><div class="cell-sub">' + escapeHtml(subParts.join(" · ")) + '</div></td>',
+          '  <td>' + escapeHtml(item["目标国家/城市"] || "-") + '</td>',
+          '  <td><span class="tag tag-' + escapeHtml(type) + '">' + escapeHtml(item["类型"] || "-") + '</span></td>',
+          '  <td><span class="tag tag-' + escapeHtml(status) + '">' + escapeHtml(item["状态"]) + '</span></td>',
+          '  <td>' + escapeHtml(item["归属BG"] || "-") + '</td>',
           '  <td>' + score + '</td>',
-          '  <td>' + escapeHtml(item.owner || "-") + '</td>',
-          '  <td class="cell-attach">' + (item.attach ? renderAttachments(item.attach, true) : '-') + '</td>',
-          '  <td class="mono" style="color:var(--text-muted);">' + escapeHtml(formatShortDate(item.created)) + '</td>',
-          '  <td class="mono" style="color:var(--text-muted);">' + escapeHtml(formatShortDate(item.updated)) + '</td>',
+          '  <td>' + escapeHtml(item["负责人"] || "-") + '</td>',
+          '  <td class="cell-attach">' + (item["附件"] ? renderAttachments(item["附件"], true) : '-') + '</td>',
+          '  <td class="mono" style="color:var(--text-muted);">' + escapeHtml(formatShortDate(item["创建时间"])) + '</td>',
+          '  <td class="mono" style="color:var(--text-muted);">' + escapeHtml(formatShortDate(item["更新时间"])) + '</td>',
           '</tr>',
         ].join("");
       })
