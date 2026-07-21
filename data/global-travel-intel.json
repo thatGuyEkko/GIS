@@ -1,0 +1,297 @@
+{
+  "metadata": {
+    "source_workbook": "global-travel-intel-template.xlsx",
+    "generated_at": "2026-07-21T15:38:00",
+    "sheet_names": [
+      "countries",
+      "news",
+      "opportunities",
+      "expos"
+    ]
+  },
+  "countries": [
+    {
+      "country_code": "US",
+      "country_name": "美国",
+      "region_name": "北美",
+      "sub_region_name": "北美成熟市场",
+      "official_language": "英语",
+      "population_value": 341000000,
+      "population_growth_rate": 0.53,
+      "tourism_overview": "入境与本地休闲消费双支撑，航空与主题娱乐带动高频旅游支出。",
+      "opportunity_summary": "高客单定制游、主题度假与目的地内容合作空间大。",
+      "focus_level": "核心",
+      "headline_metric": "2025年国际访客消费预计继续恢复至疫前上方",
+      "map_enabled_flag": true,
+      "display_order": 1,
+      "map_x": "",
+      "map_y": ""
+    },
+    {
+      "country_code": "JP",
+      "country_name": "日本",
+      "region_name": "东北亚",
+      "sub_region_name": "东北亚成熟市场",
+      "official_language": "日语",
+      "population_value": 123900000,
+      "population_growth_rate": -0.44,
+      "tourism_overview": "入境复苏强劲，地方旅游、会展及内容型出行持续活跃。",
+      "opportunity_summary": "目的地联营产品、二三线城市深度游和会奖旅行有增长空间。",
+      "focus_level": "重点",
+      "headline_metric": "入境消费保持高位，区域机场带动下沉目的地增长",
+      "map_enabled_flag": true,
+      "display_order": 2,
+      "map_x": "",
+      "map_y": ""
+    },
+    {
+      "country_code": "AE",
+      "country_name": "阿联酋",
+      "region_name": "中东",
+      "sub_region_name": "海湾市场",
+      "official_language": "阿拉伯语",
+      "population_value": 10680000,
+      "population_growth_rate": 0.97,
+      "tourism_overview": "迪拜和阿布扎比持续强化中转、会展和奢旅目的地属性。",
+      "opportunity_summary": "高净值客群服务、商旅会展配套及跨境流量合作值得跟进。",
+      "focus_level": "重点",
+      "headline_metric": "大型会展和航司联动推动全年国际旅客保持高位",
+      "map_enabled_flag": true,
+      "display_order": 3,
+      "map_x": "",
+      "map_y": ""
+    },
+    {
+      "country_code": "FR",
+      "country_name": "法国",
+      "region_name": "欧洲",
+      "sub_region_name": "西欧成熟市场",
+      "official_language": "法语",
+      "population_value": 68400000,
+      "population_growth_rate": 0.21,
+      "tourism_overview": "巴黎及核心旅游带稳定吸引长线游客，文化和赛事型出游带动增量。",
+      "opportunity_summary": "文化目的地产品、城市通票整合和品牌联名玩法具备空间。",
+      "focus_level": "观察",
+      "headline_metric": "大型活动后续效应仍在释放，城市旅游韧性较强",
+      "map_enabled_flag": true,
+      "display_order": 4,
+      "map_x": "",
+      "map_y": ""
+    },
+    {
+      "country_code": "BR",
+      "country_name": "巴西",
+      "region_name": "拉美",
+      "sub_region_name": "拉美增长市场",
+      "official_language": "葡萄牙语",
+      "population_value": 203100000,
+      "population_growth_rate": 0.52,
+      "tourism_overview": "国内旅游和节庆活动带动区域型消费，跨境合作需求增加。",
+      "opportunity_summary": "区域分销合作、海岛及节庆线路、拉美多国联游存在机会。",
+      "focus_level": "观察",
+      "headline_metric": "本地节庆带动旅游热度，区域互联航线持续增加",
+      "map_enabled_flag": true,
+      "display_order": 5,
+      "map_x": "",
+      "map_y": ""
+    },
+    {
+      "country_code": "SG",
+      "country_name": "新加坡",
+      "region_name": "东南亚",
+      "sub_region_name": "东南亚枢纽市场",
+      "official_language": "英语",
+      "population_value": 5920000,
+      "population_growth_rate": 1.21,
+      "tourism_overview": "航旅枢纽、会展和家庭游产品供给成熟，适合做区域协同。",
+      "opportunity_summary": "区域中转产品、主题娱乐、会奖旅行业务延展性强。",
+      "focus_level": "重点",
+      "headline_metric": "樟宜枢纽和会展经济持续拉动高价值旅客流入",
+      "map_enabled_flag": true,
+      "display_order": 6,
+      "map_x": "",
+      "map_y": ""
+    }
+  ],
+  "news": [
+    {
+      "country_code": "US",
+      "news_type": "旅游业重要新闻",
+      "headline": "美国暑期旅游预订保持增长",
+      "publish_date": "2026-07-08",
+      "summary": "多家航旅平台显示暑期家庭和主题度假需求继续走高。",
+      "source_name": "Skift"
+    },
+    {
+      "country_code": "US",
+      "news_type": "关联重要新闻",
+      "headline": "国际航线运力恢复推动入境游回暖",
+      "publish_date": "2026-07-03",
+      "summary": "主要门户机场国际运力提升，跨境休闲及商务需求同步修复。",
+      "source_name": "Travel Weekly"
+    },
+    {
+      "country_code": "JP",
+      "news_type": "旅游业重要新闻",
+      "headline": "日本地方目的地入境热度持续提升",
+      "publish_date": "2026-07-06",
+      "summary": "二三线城市通过航线和内容营销承接更多国际游客。",
+      "source_name": "Japan Times"
+    },
+    {
+      "country_code": "JP",
+      "news_type": "关联重要新闻",
+      "headline": "会奖旅行采购需求向日本集中",
+      "publish_date": "2026-06-29",
+      "summary": "企业活动和奖励旅游采购重心向东京及大阪周边扩散。",
+      "source_name": "TTG Asia"
+    },
+    {
+      "country_code": "AE",
+      "news_type": "旅游业重要新闻",
+      "headline": "迪拜会展季带动高端酒店入住率提升",
+      "publish_date": "2026-07-10",
+      "summary": "大型行业活动叠加转机旅客，拉高商务与休闲复合需求。",
+      "source_name": "Arabian Business"
+    },
+    {
+      "country_code": "AE",
+      "news_type": "关联重要新闻",
+      "headline": "阿联酋航司加码亚洲航线网络",
+      "publish_date": "2026-06-25",
+      "summary": "更多直飞班次提升亚洲旅客中转和停留转化空间。",
+      "source_name": "Gulf News"
+    },
+    {
+      "country_code": "FR",
+      "news_type": "旅游业重要新闻",
+      "headline": "法国城市文化节庆延长暑期游客停留时间",
+      "publish_date": "2026-07-01",
+      "summary": "多城联动文化活动提升深度游和二次消费表现。",
+      "source_name": "Le Monde"
+    },
+    {
+      "country_code": "BR",
+      "news_type": "旅游业重要新闻",
+      "headline": "巴西区域节庆带动目的地搜索量上升",
+      "publish_date": "2026-07-04",
+      "summary": "节庆活动刺激本地及周边国家短线出游需求。",
+      "source_name": "Panrotas"
+    },
+    {
+      "country_code": "SG",
+      "news_type": "旅游业重要新闻",
+      "headline": "新加坡会展活动推动商务旅客稳定增长",
+      "publish_date": "2026-07-09",
+      "summary": "会展经济为高价值旅客和企业采购带来持续增量。",
+      "source_name": "CNA"
+    }
+  ],
+  "opportunities": [
+    {
+      "country_code": "US",
+      "opportunity_category": "目的地产品",
+      "opportunity_title": "高客单家庭度假组合",
+      "summary": "围绕主题乐园、国家公园和海滨度假，做高客单家庭旅程设计。",
+      "priority_level": "核心"
+    },
+    {
+      "country_code": "US",
+      "opportunity_category": "渠道合作",
+      "opportunity_title": "与北美内容平台共建目的地种草专题",
+      "summary": "联动内容平台和KOL，承接长周期决策类客群。",
+      "priority_level": "重点"
+    },
+    {
+      "country_code": "JP",
+      "opportunity_category": "目的地产品",
+      "opportunity_title": "日本二三线城市深度游",
+      "summary": "结合铁路、温泉和在地文化体验，构建差异化产品。",
+      "priority_level": "重点"
+    },
+    {
+      "country_code": "AE",
+      "opportunity_category": "会奖商旅",
+      "opportunity_title": "中东会展客群定制接待",
+      "summary": "面向高预算商旅客群，整合酒店、用车和商务配套。",
+      "priority_level": "重点"
+    },
+    {
+      "country_code": "FR",
+      "opportunity_category": "品牌合作",
+      "opportunity_title": "文化IP与目的地联名活动",
+      "summary": "以博物馆、艺术节和城市品牌合作提升转化。",
+      "priority_level": "观察"
+    },
+    {
+      "country_code": "BR",
+      "opportunity_category": "区域联游",
+      "opportunity_title": "拉美多国联游产品试水",
+      "summary": "依托巴西枢纽流量延展到周边国家，验证联游需求。",
+      "priority_level": "观察"
+    },
+    {
+      "country_code": "SG",
+      "opportunity_category": "区域枢纽",
+      "opportunity_title": "东南亚中转联游产品",
+      "summary": "将新加坡作为高品质中转和短停留产品中心。",
+      "priority_level": "重点"
+    }
+  ],
+  "expos": [
+    {
+      "country_code": "US",
+      "expo_name": "IPW",
+      "expo_start_date": "2026-05-17",
+      "expo_end_date": "2026-05-21",
+      "expo_quarter": "Q2",
+      "expo_city": "拉斯维加斯",
+      "expo_note": "北美旅游业重要B2B展会，适合对接目的地和分销资源。"
+    },
+    {
+      "country_code": "JP",
+      "expo_name": "Tourism Expo Japan",
+      "expo_start_date": "2026-09-24",
+      "expo_end_date": "2026-09-27",
+      "expo_quarter": "Q3",
+      "expo_city": "东京",
+      "expo_note": "日本旅业年度重点展会，覆盖目的地、航司和会奖资源。"
+    },
+    {
+      "country_code": "AE",
+      "expo_name": "Arabian Travel Market",
+      "expo_start_date": "2026-05-04",
+      "expo_end_date": "2026-05-07",
+      "expo_quarter": "Q2",
+      "expo_city": "迪拜",
+      "expo_note": "中东头部旅业展，适合观察中东出入境趋势和渠道资源。"
+    },
+    {
+      "country_code": "FR",
+      "expo_name": "IFTM Top Resa",
+      "expo_start_date": "2026-09-29",
+      "expo_end_date": "2026-10-01",
+      "expo_quarter": "Q3",
+      "expo_city": "巴黎",
+      "expo_note": "法国旅游行业重要展会，偏欧洲渠道和目的地合作。"
+    },
+    {
+      "country_code": "BR",
+      "expo_name": "WTM Latin America",
+      "expo_start_date": "2026-04-14",
+      "expo_end_date": "2026-04-16",
+      "expo_quarter": "Q2",
+      "expo_city": "圣保罗",
+      "expo_note": "拉美区域旅业合作展，适合了解区域联游和本地采购侧变化。"
+    },
+    {
+      "country_code": "SG",
+      "expo_name": "ITB Asia",
+      "expo_start_date": "2026-10-21",
+      "expo_end_date": "2026-10-23",
+      "expo_quarter": "Q4",
+      "expo_city": "新加坡",
+      "expo_note": "亚洲核心旅业展，适合看跨境流量、会奖和技术合作机会。"
+    }
+  ]
+}
