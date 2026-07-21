@@ -21,6 +21,7 @@
   --gray: #7c7b73;
   --gray-light: #f1eee8;
   --nav-width: 232px;
+  --nav-collapsed-width: 76px;
   font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
 }
 
@@ -55,10 +56,11 @@ a {
   padding: 24px 0;
   background: var(--surface);
   border-right: 1px solid var(--border);
+  transition: width 0.2s ease;
 }
 
 .brand {
-  padding: 0 22px 22px;
+  padding: 0 56px 18px 22px;
   border-bottom: 1px solid var(--border);
 }
 
@@ -67,12 +69,6 @@ a {
   font-weight: 600;
   color: var(--purple);
   margin-bottom: 6px;
-}
-
-.brand-sub {
-  font-size: 12px;
-  color: var(--text-muted);
-  line-height: 1.6;
 }
 
 .nav-group {
@@ -84,11 +80,16 @@ a {
   flex-direction: column;
   gap: 4px;
   padding: 12px 14px;
+  min-height: 64px;
   margin-bottom: 6px;
   border-radius: 8px;
   border: 1px solid transparent;
   color: var(--text-sub);
   transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.nav-item::before {
+  display: none;
 }
 
 .nav-item:hover {
@@ -122,6 +123,106 @@ a {
   flex: 1;
   margin-left: var(--nav-width);
   padding: 34px 40px 48px;
+  transition: margin-left 0.2s ease;
+}
+
+.sidebar-toggle {
+  position: absolute;
+  top: 20px;
+  right: -16px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text-sub);
+  box-shadow: 0 10px 20px rgba(36, 36, 36, 0.08);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.sidebar-toggle:hover {
+  background: var(--purple-light);
+  border-color: #dbc9f0;
+  color: var(--purple);
+}
+
+.sidebar-toggle:focus-visible {
+  outline: none;
+  border-color: #cdb7e9;
+  box-shadow: 0 0 0 3px rgba(107, 63, 160, 0.14), 0 10px 20px rgba(36, 36, 36, 0.08);
+}
+
+.sidebar-toggle-icon {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.app-shell.sidebar-collapsed .sidebar {
+  width: var(--nav-collapsed-width);
+}
+
+.app-shell.sidebar-collapsed .content {
+  margin-left: var(--nav-collapsed-width);
+}
+
+.app-shell.sidebar-collapsed .brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 12px 18px;
+}
+
+.app-shell.sidebar-collapsed .brand::before {
+  content: "OOMS";
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--purple-light);
+  color: var(--purple);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.app-shell.sidebar-collapsed .brand-name {
+  width: 0;
+  height: 0;
+  margin: 0;
+  opacity: 0;
+  overflow: hidden;
+}
+
+.app-shell.sidebar-collapsed .nav-group {
+  padding: 18px 10px 0;
+}
+
+.app-shell.sidebar-collapsed .nav-item {
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  padding: 0;
+  min-height: 48px;
+}
+
+.app-shell.sidebar-collapsed .nav-item::before {
+  display: block;
+  content: attr(data-short-label);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.app-shell.sidebar-collapsed .nav-title,
+.app-shell.sidebar-collapsed .nav-desc {
+  display: none;
 }
 
 .page-head {
@@ -1364,6 +1465,52 @@ tbody tr:last-child td {
     width: 100%;
     border-right: none;
     border-bottom: 1px solid var(--border);
+  }
+
+  .sidebar-toggle {
+    display: none;
+  }
+
+  .app-shell.sidebar-collapsed .sidebar {
+    width: 100%;
+  }
+
+  .app-shell.sidebar-collapsed .content {
+    margin-left: 0;
+  }
+
+  .app-shell.sidebar-collapsed .brand {
+    display: block;
+    padding: 0 56px 18px 22px;
+  }
+
+  .app-shell.sidebar-collapsed .brand::before,
+  .app-shell.sidebar-collapsed .nav-item::before {
+    display: none;
+  }
+
+  .app-shell.sidebar-collapsed .brand-name {
+    width: auto;
+    height: auto;
+    margin-bottom: 0;
+    opacity: 1;
+    overflow: visible;
+  }
+
+  .app-shell.sidebar-collapsed .nav-group {
+    padding: 18px 12px 0;
+  }
+
+  .app-shell.sidebar-collapsed .nav-item {
+    align-items: flex-start;
+    justify-content: flex-start;
+    padding: 12px 14px;
+    min-height: 64px;
+  }
+
+  .app-shell.sidebar-collapsed .nav-title,
+  .app-shell.sidebar-collapsed .nav-desc {
+    display: block;
   }
 
   .content {
