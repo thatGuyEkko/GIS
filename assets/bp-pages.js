@@ -7,7 +7,19 @@
 
   const pageType = pageRoot.dataset.bpPage;
   const bpCode = resolveBpCode(pageRoot);
-  const dataPrefix = window.OOMS_DATA_PREFIX || "data";
+  // 数据目录：根据本脚本自身 URL 推算，data/ 始终是 assets/ 的同级目录。
+  // 这样本地根服务、线上子路径(如 /GIS/)、子目录页面都能正确指向 data/。
+  const dataPrefix = (function () {
+    var s = document.currentScript;
+    if (!s || !s.src) {
+      var all = document.getElementsByTagName("script");
+      for (var i = all.length - 1; i >= 0; i--) {
+        if (/bp-pages\.js/.test(all[i].src)) { s = all[i]; break; }
+      }
+    }
+    var src = s && s.src ? s.src : "";
+    return src.replace(/assets\/[^/]*$/, "") + "data";
+  })();
   const tagPalette = ["blue", "purple", "teal", "green", "orange", "gray"];
   const groupLabels = {
     related_opportunity: "关联商机",

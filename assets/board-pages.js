@@ -13,6 +13,20 @@
     });
   }
 
+  // 数据目录：按本脚本自身 URL 推算（data/ 与 assets/ 同级），
+  // 兼容本地根服务、线上子路径(如 /GIS/)与子目录页面。
+  var DATA_BASE = (function () {
+    var s = document.currentScript;
+    if (!s || !s.src) {
+      var all = document.getElementsByTagName("script");
+      for (var i = all.length - 1; i >= 0; i--) {
+        if (/board-pages\.js/.test(all[i].src)) { s = all[i]; break; }
+      }
+    }
+    var src = s && s.src ? s.src : "";
+    return src.replace(/assets\/[^/]*$/, "") + "data/";
+  })();
+
   function parseCsv(text) {
     text = (text || "").replace(/^﻿/, "");
     var rows = [], row = [], len = text.length, cell = "", q = false;
@@ -113,9 +127,9 @@
 
   function load() {
     return Promise.all([
-      fetchCsv("data/leads.csv"),
-      fetchCsv("data/opportunities.csv"),
-      fetchCsv("data/bp_main.csv")
+      fetchCsv(DATA_BASE + "leads.csv"),
+      fetchCsv(DATA_BASE + "opportunities.csv"),
+      fetchCsv(DATA_BASE + "bp_main.csv")
     ]).then(function (res) {
       return {
         leads: parseCsv(res[0]),
