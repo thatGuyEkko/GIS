@@ -144,9 +144,9 @@
 
   function render(data) {
     var leads = data.leads, opps = data.opps, bps = data.bps;
-    var open = opps.filter(function (o) { return CLOSED.indexOf(o["状态"]) < 0; });
-    var done = opps.filter(function (o) { return o["状态"] === "已完成"; });
-    var evaling = opps.filter(function (o) { return EVALING.indexOf(o["状态"]) >= 0; });
+    var open = opps.filter(function (o) { return CLOSED.indexOf(o["status"]) < 0; });
+    var done = opps.filter(function (o) { return o["status"] === "已完成"; });
+    var evaling = opps.filter(function (o) { return EVALING.indexOf(o["status"]) >= 0; });
 
     setText("summary-meta", "覆盖 " + open.length + " 个在管商机、" + leads.length + " 条线索、" + bps.length + " 份 BP");
 
@@ -155,20 +155,20 @@
     setText("m-eval", evaling.length);
     setText("m-done", done.length);
 
-    var ecount = countBy(evaling, "状态");
+    var ecount = countBy(evaling, "status");
     var ebreak = Object.keys(ecount).map(function (k) { return k + " " + ecount[k]; });
     setText("sub-eval", ebreak.length ? ebreak.join(" / ") : "暂无评估中项目");
 
-    var ls = barList(countBy(leads, "来源"));
+    var ls = barList(countBy(leads, "source"));
     setHTML("src-lead-source", ls || '<div class="chart-note">暂无线索数据</div>');
 
-    var ot = barList(countBy(opps, "类型"));
+    var ot = barList(countBy(opps, "type"));
     setHTML("src-opp-type", ot || '<div class="chart-note">暂无商机数据</div>');
 
-    var ob = barList(countBy(opps, "归属BG"));
+    var ob = barList(countBy(opps, "bg"));
     setHTML("src-opp-bg", ob || '<div class="chart-note">暂无商机数据</div>');
 
-    var sc = countBy(opps, "状态");
+    var sc = countBy(opps, "status");
     setText("lg-prog", "推进中 " + (sc["推进中"] || 0));
     setText("lg-open", "在管 " + open.length);
     setText("lg-watch", "观望/暂停 " + evaling.length);
@@ -196,7 +196,7 @@
   function renderMap(opps) {
     var byCountry = {};
     opps.forEach(function (o) {
-      var c = (o["目标国家/城市"] || "").trim();
+      var c = (o["country"] || "").trim();
       if (!c) return;
       if (!byCountry[c]) byCountry[c] = [];
       byCountry[c].push(o);
@@ -211,7 +211,7 @@
       var n = list.length;
       var color = "tag-blue";
       list.forEach(function (o) {
-        var s = o["状态"];
+        var s = o["status"];
         if (s === "已完成") color = "tag-green";
         else if (s === "推进中" && color !== "tag-green") color = "tag-purple";
         else if ((s === "观望中" || s === "暂停") && color === "tag-blue") color = "tag-orange";
@@ -229,7 +229,7 @@
     var listHtml = sorted.map(function (e) {
       var c = e[0], list = e[1], n = list.length;
       var types = {};
-      list.forEach(function (o) { var t = o["类型"]; if (t) types[t] = (types[t] || 0) + 1; });
+      list.forEach(function (o) { var t = o["type"]; if (t) types[t] = (types[t] || 0) + 1; });
       var note = Object.keys(types).join("、") || "—";
       var pct = max ? Math.round((n / max) * 100) : 0;
       return '<div class="map-list-item"><div><div class="map-list-name">' + esc(c) + '</div>' +
@@ -244,16 +244,16 @@
     var items = [];
     leads.forEach(function (o) {
       items.push({
-        time: normDate(o["更新时间"]), name: o["线索名称"],
-        sub: (o["归属BG"] || "") + (o["归属BG"] ? " / " : "") + (o["类型"] || ""),
-        node: "线索录入", nodeCls: "tag-gray", desc: o["线索描述"]
+        time: normDate(o["updated"]), name: o["name"],
+        sub: (o["bg"] || "") + (o["bg"] ? " / " : "") + (o["type"] || ""),
+        node: "线索录入", nodeCls: "tag-gray", desc: o["copy"]
       });
     });
     opps.forEach(function (o) {
       items.push({
-        time: normDate(o["更新时间"]), name: o["商机名称"],
-        sub: (o["归属BG"] || "") + (o["归属BG"] ? " / " : "") + (o["类型"] || ""),
-        node: o["状态"] || "—", nodeCls: statusTag(o["状态"]), desc: o["商机描述"]
+        time: normDate(o["updated"]), name: o["name"],
+        sub: (o["bg"] || "") + (o["bg"] ? " / " : "") + (o["type"] || ""),
+        node: o["status"] || "—", nodeCls: statusTag(o["status"]), desc: o["copy"]
       });
     });
     items = items.filter(function (it) { return (it.time || "").trim() !== ""; });
