@@ -7,7 +7,7 @@
 
   const pageType = pageRoot.dataset.bpPage;
   const bpCode = resolveBpCode(pageRoot);
-  const dataPrefix = "data";
+  const dataPrefix = window.OOMS_DATA_PREFIX || "data";
   const tagPalette = ["blue", "purple", "teal", "green", "orange", "gray"];
   const groupLabels = {
     related_opportunity: "关联商机",
