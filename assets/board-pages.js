@@ -113,9 +113,9 @@
 
   function load() {
     return Promise.all([
-      fetchCsv("data/leads.csv"),
-      fetchCsv("data/opportunities.csv"),
-      fetchCsv("data/bp_main.csv")
+      fetchCsv("/data/leads.csv"),
+      fetchCsv("/data/opportunities.csv"),
+      fetchCsv("/data/bp_main.csv")
     ]).then(function (res) {
       return {
         leads: parseCsv(res[0]),
