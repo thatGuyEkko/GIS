@@ -13,4 +13,25 @@ bp_code,tag_group,tag_value,display_order
 2026-1-US,market_type,境内游,1
 2026-1-US,market_type,出境游,2
 2026-1-US,core_customer,华人留学生,1
-2026-1-US,core_customer,美国Z世代大学生,2
+2026-2-AU,related_opportunity,当地用车,1
+2026-2-AU,related_opportunity,留学移民机构合作,2
+2026-2-AU,related_opportunity,酒店民宿 景区合作,3
+2026-2-AU,bg,酒旅,1
+2026-2-AU,bg,市场,2
+2026-2-AU,bg,出行,3
+2026-2-AU,main_product,本地玩乐,1
+2026-2-AU,main_product,酒店民宿,2
+2026-2-AU,main_product,用车,4
+2026-2-AU,market_type,境内游,1
+2026-2-AU,market_type,出境游,2
+2026-2-AU,core_customer,华人留学生&移民,1
+2026-2-AU,core_customer,外籍出境游客,2
+2026-5-SG,related_opportunity,国际特价机票,1
+2026-5-SG,related_opportunity,机酒+X项,2
+2026-5-SG,bg,度假-门票玩乐-国内门票,3
+2026-5-SG,bg,酒店,2
+2026-5-SG,bg,机票,1
+2026-5-SG,main_product,度假-门票玩乐-国内门票,3
+2026-5-SG,main_product,酒店,2
+2026-5-SG,main_product,机票,1
+2026-5-SG,core_customer,当地华人,1
