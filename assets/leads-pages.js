@@ -5,8 +5,21 @@
     return;
   }
 
-  const LEADS_CSV = "/data/leads.csv";
-  const OPP_CSV = "/data/opportunities.csv";
+  // 数据目录：按本脚本自身 URL 推算（data/ 与 assets/ 同级），
+  // 兼容本地根服务、线上子路径(如 /GIS/)与子目录页面。
+  const DATA_BASE = (function () {
+    var s = document.currentScript;
+    if (!s || !s.src) {
+      var all = document.getElementsByTagName("script");
+      for (var i = all.length - 1; i >= 0; i--) {
+        if (/leads-pages\.js/.test(all[i].src)) { s = all[i]; break; }
+      }
+    }
+    var src = s && s.src ? s.src : "";
+    return src.replace(/assets\/[^/]*$/, "") + "data/";
+  })();
+  const LEADS_CSV = DATA_BASE + "leads.csv";
+  const OPP_CSV = DATA_BASE + "opportunities.csv";
 
   // 关闭样本由状态判定（与展示约定一致）
   const CLOSED_STATUSES = ["筛查未通过", "初评未通过", "已放弃"];
@@ -75,7 +88,7 @@
       render();
     })
     .catch(function (error) {
-      renderState(mount, "线索数据加载失败，请检查 /data/ 目录下的 leads.csv / opportunities.csv 与本地服务。", true, error);
+      renderState(mount, "线索数据加载失败，请检查 data 目录下的 leads.csv / opportunities.csv。", true, error);
     });
 
   function loadData() {
@@ -216,7 +229,7 @@
       '  <div>',
       '    <div class="page-kicker">模块二 / Leads &amp; Opportunities</div>',
       '    <h1 class="page-title">线索商机管理</h1>',
-      '    <p class="page-sub">线索池、推进中的商机以及已关闭样本统一从 /data/leads.csv 与 /data/opportunities.csv 两个模版渲染，页面只读展示，不支持在线编辑。</p>',
+      '    <p class="page-sub">线索池、推进中的商机以及已关闭样本统一从 data/leads.csv 与 data/opportunities.csv 两个模版渲染，页面只读展示，不支持在线编辑。</p>',
       '  </div>',
       '  <div class="head-aside">',
       '    <div class="summary-card">',
