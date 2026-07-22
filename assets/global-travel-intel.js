@@ -2,6 +2,41 @@
   "use strict";
 
   var pageRoot = document.querySelector("[data-travel-intel-page]");
+  var mapChart = null;
+  var currentView = null;
+  var hasBoundResize = false;
+  var lastSelectedCode = null;
+  var regionDisplayNames = typeof Intl !== "undefined" && typeof Intl.DisplayNames === "function"
+    ? new Intl.DisplayNames(["en"], { type: "region" })
+    : null;
+  var mapNameOverrides = {
+    AE: "United Arab Emirates",
+    BA: "Bosnia and Herz.",
+    BN: "Brunei",
+    CF: "Central African Rep.",
+    CG: "Congo",
+    CD: "Dem. Rep. Congo",
+    CI: "Cote d'Ivoire",
+    CZ: "Czech Rep.",
+    DO: "Dominican Rep.",
+    EH: "W. Sahara",
+    GB: "United Kingdom",
+    IR: "Iran",
+    KP: "North Korea",
+    KR: "South Korea",
+    LA: "Laos",
+    MK: "Macedonia",
+    PS: "Palestine",
+    RU: "Russia",
+    SB: "Solomon Is.",
+    SS: "S. Sudan",
+    SY: "Syria",
+    TL: "Timor-Leste",
+    TZ: "Tanzania",
+    US: "United States",
+    VE: "Venezuela",
+    VN: "Vietnam"
+  };
 
   if (!pageRoot) {
     return;
@@ -31,21 +66,6 @@
     expos: dataPrefix + "travel_intel_expos.csv"
   };
 
-  var defaultMapCountries = [
-    { code: "US", name: "美国", cx: 216, cy: 190, labelDx: 0, labelDy: -18, size: "lg" },
-    { code: "CA", name: "加拿大", cx: 196, cy: 106, labelDx: 0, labelDy: -16, size: "md" },
-    { code: "BR", name: "巴西", cx: 306, cy: 304, labelDx: 0, labelDy: 24, size: "md" },
-    { code: "GB", name: "英国", cx: 430, cy: 116, labelDx: 0, labelDy: -18, size: "sm" },
-    { code: "FR", name: "法国", cx: 452, cy: 136, labelDx: 0, labelDy: 24, size: "sm" },
-    { code: "AE", name: "阿联酋", cx: 586, cy: 186, labelDx: 0, labelDy: 24, size: "sm" },
-    { code: "SA", name: "沙特阿拉伯", cx: 566, cy: 206, labelDx: 0, labelDy: 26, size: "sm" },
-    { code: "JP", name: "日本", cx: 772, cy: 156, labelDx: 0, labelDy: -18, size: "sm" },
-    { code: "KR", name: "韩国", cx: 740, cy: 154, labelDx: 0, labelDy: 24, size: "xs" },
-    { code: "SG", name: "新加坡", cx: 686, cy: 258, labelDx: 0, labelDy: 24, size: "xs" },
-    { code: "TH", name: "泰国", cx: 668, cy: 234, labelDx: 0, labelDy: 24, size: "xs" },
-    { code: "AU", name: "澳大利亚", cx: 774, cy: 338, labelDx: 0, labelDy: 26, size: "md" }
-  ];
-  var mapLayoutByCode = {};
   var store = null;
   var state = {
     region: "全部",
@@ -53,12 +73,10 @@
     category: "全部",
     expoQuarter: "全部",
     activeCountryCode: null,
-    hoverCountryCode: null
+    hoverCountryCode: null,
+    activeAnchor: null,
+    hoverAnchor: null
   };
-
-  defaultMapCountries.forEach(function (item) {
-    mapLayoutByCode[item.code] = item;
-  });
 
   if (window.location.protocol === "file:") {
     renderState(
@@ -179,39 +197,13 @@
         headline_metric: String(item.headline_metric || "").trim(),
         map_enabled_flag: toBoolean(item.map_enabled_flag),
         display_order: toOptionalNumber(item.display_order),
-        map_x: toOptionalNumber(item.map_x),
-        map_y: toOptionalNumber(item.map_y),
         news: [],
         opportunities: [],
         expos: []
       };
 
-      var layout = mapLayoutByCode[country.country_code];
-
-      if (layout) {
-        if (country.map_x === null) {
-          country.map_x = layout.cx;
-        }
-
-        if (country.map_y === null) {
-          country.map_y = layout.cy;
-        }
-
-        country.map_label_dx = layout.labelDx;
-        country.map_label_dy = layout.labelDy;
-        country.map_marker_size = layout.size;
-      } else {
-        country.map_label_dx = 0;
-        country.map_label_dy = -18;
-        country.map_marker_size = "sm";
-      }
-
       if (country.display_order === null) {
         country.display_order = 9999;
-      }
-
-      if (country.map_x === null || country.map_y === null) {
-        country.map_enabled_flag = false;
       }
 
       return country;
@@ -279,31 +271,36 @@
   }
 
   function renderPage() {
+    if (!ensureChartRuntime()) {
+      return;
+    }
+
     var filters = deriveFilterOptions(store.countries);
     var filteredCountries = getFilteredCountries(store.countries);
+    var visibleCountries = filteredCountries.filter(canRenderOnMap);
 
-    if (state.activeCountryCode && !filteredCountries.some(function (country) {
+    if (state.activeCountryCode && !visibleCountries.some(function (country) {
       return country.country_code === state.activeCountryCode;
     })) {
       state.activeCountryCode = null;
+      state.activeAnchor = null;
     }
 
-    var activeCountry = getActiveCountry(filteredCountries);
-    var visibleCountries = filteredCountries.filter(function (country) {
-      return country.map_enabled_flag && hasMapPosition(country);
-    });
-    var mappedCountries = store.countries.filter(function (country) {
-      return country.map_enabled_flag && hasMapPosition(country);
-    });
-    var regionCount = countDistinct(filteredCountries, "region_name");
-    var languageCount = countDistinct(filteredCountries, "official_language");
-    var opportunityCount = filteredCountries.reduce(function (sum, country) {
-      return sum + country.opportunities.length;
-    }, 0);
-    var expoCount = filteredCountries.reduce(function (sum, country) {
-      return sum + country.expos.length;
-    }, 0);
+    if (state.hoverCountryCode && !visibleCountries.some(function (country) {
+      return country.country_code === state.hoverCountryCode;
+    })) {
+      state.hoverCountryCode = null;
+      state.hoverAnchor = null;
+    }
 
+    currentView = {
+      filters: filters,
+      filteredCountries: filteredCountries,
+      visibleCountries: visibleCountries,
+      visibleCountriesByCode: indexCountriesByCode(visibleCountries)
+    };
+
+    destroyMapChart();
     document.title = "OOMS | 全球化旅业信息看板";
 
     pageRoot.innerHTML = [
@@ -311,22 +308,11 @@
       '  <div>',
       '    <div class="page-kicker">模块零 / Global Travel Intelligence</div>',
       '    <h1 class="page-title">全球化旅业信息看板</h1>',
-      '    <p class="page-sub">用一页地图聚合各国旅业基础面、热点新闻、机会点和行业展会。当前页面直接读取 `data/travel_intel_*.csv` 四份数据文件，维护 CSV 后刷新页面即可看到结果。</p>',
-      '  </div>',
-      '  <div class="head-aside">',
-      '    <div class="summary-card summary-stack">',
-      '      <div><div class="summary-label">当前数据源</div><div class="summary-strong">travel_intel_*.csv</div></div>',
-      '      <div><div class="summary-key">可交互国家</div><div class="summary-meta mono">' + escapeHtml(String(visibleCountries.length)) + ' 个</div></div>',
-      '      <div><div class="summary-key">录入方式</div><div class="summary-meta">国家、新闻、机会点、展会分别维护在 4 份 CSV 中</div></div>',
-      '    </div>',
       '  </div>',
       '</div>',
       '<section class="travel-filter-card section">',
       '  <div class="section-head">',
-      '    <div>',
-      '      <div class="section-title">头部筛选栏</div>',
-      '      <div class="section-sub">筛选项会同步影响地图上可交互国家，以及悬浮弹层中呈现的国家信息。</div>',
-      '    </div>',
+      '    <div class="section-title">筛选</div>',
       '    <button type="button" class="travel-reset-btn" data-travel-action="reset">重置筛选</button>',
       '  </div>',
       '  <div class="travel-filter-grid">',
@@ -336,40 +322,290 @@
       buildSelectField("展会周期", "expoQuarter", filters.expoQuarters, state.expoQuarter),
       '  </div>',
       '</section>',
-      '<section class="metrics">',
-      buildMetricCard("筛选后国家数", String(filteredCountries.length), "purple", "当前筛选条件下可呈现信息的国家数"),
-      buildMetricCard("覆盖区域", String(regionCount) + " 个", "blue", "按国家基础信息中的区域字段去重"),
-      buildMetricCard("机会点条目", String(opportunityCount) + " 条", "green", "归属于筛选结果国家的机会点摘要"),
-      buildMetricCard("展会信息", String(expoCount) + " 条", "orange", "归属于筛选结果国家的展会名称与时间"),
-      '</section>',
       '<section class="travel-map-card section">',
       '  <div class="section-head">',
-      '    <div>',
-      '      <div class="section-title">主地图看板</div>',
-      '      <div class="section-sub">只有底层有数据且命中过滤条件的国家会显示为可交互热点。鼠标悬浮即可查看该国家的完整信息。</div>',
-      '    </div>',
+      '    <div class="section-title">主地图看板</div>',
       '  </div>',
       '  <div class="travel-map-shell">',
-      buildWorldMapSvg(visibleCountries, mappedCountries),
-      buildHoverCard(activeCountry, visibleCountries),
-      '  </div>',
-      '  <div class="travel-map-legend">',
-      '    <span class="legend-item"><span class="legend-dot travel-legend-active"></span> 有数据且可交互</span>',
-      '    <span class="legend-item"><span class="legend-dot travel-legend-muted"></span> 无数据或已被筛选隐藏</span>',
-      '    <span class="legend-item"><span class="legend-dot travel-legend-focus"></span> 当前悬浮或选中国家</span>',
-      '  </div>',
-      '</section>',
-      '<section class="info-panel section">',
-      '  <div class="panel-title">数据文件说明</div>',
-      '  <div class="list-block">',
-      '    <div class="list-item"><div class="list-item-title">1. 国家基础信息</div><div class="list-item-copy">维护 `data/travel_intel_countries.csv`。一行一个国家，控制地图点位、人口、语言、摘要和筛选维度。</div></div>',
-      '    <div class="list-item"><div class="list-item-title">2. 新闻与机会点</div><div class="list-item-copy">维护 `data/travel_intel_news.csv` 和 `data/travel_intel_opportunities.csv`。前者按国家挂新闻，后者按国家挂机会点摘要和分类。</div></div>',
-      '    <div class="list-item"><div class="list-item-title">3. 展会信息</div><div class="list-item-copy">维护 `data/travel_intel_expos.csv`。页面会直接读取展会名称、时间、城市和说明，刷新页面即可看到最新结果。</div></div>',
+      '    <div class="travel-map-canvas" data-travel-map aria-label="世界地图"></div>',
+      '    <div class="travel-map-overlay" data-travel-overlay></div>',
       '  </div>',
       '</section>'
     ].join("");
 
-    bindEvents(visibleCountries);
+    bindEvents();
+    initializeMap();
+    syncHoverCard();
+  }
+
+  function ensureChartRuntime() {
+    if (!window.echarts || typeof window.echarts.init !== "function") {
+      renderState("ECharts 组件未成功加载，请检查 assets/vendor/echarts.min.js。", true);
+      return false;
+    }
+
+    if (typeof window.echarts.getMap !== "function" || !window.echarts.getMap("world")) {
+      renderState("ECharts 世界地图数据未成功加载，请检查 assets/vendor/echarts-world.js。", true);
+      return false;
+    }
+
+    return true;
+  }
+
+  function bindEvents() {
+    var filterNodes = pageRoot.querySelectorAll("[data-travel-filter]");
+    var resetButton = pageRoot.querySelector("[data-travel-action='reset']");
+
+    Array.prototype.forEach.call(filterNodes, function (node) {
+      node.addEventListener("change", function (event) {
+        var filterKey = event.target.getAttribute("data-travel-filter");
+        state[filterKey] = event.target.value;
+        state.activeCountryCode = null;
+        state.hoverCountryCode = null;
+        state.activeAnchor = null;
+        state.hoverAnchor = null;
+        renderPage();
+      });
+    });
+
+    if (resetButton) {
+      resetButton.addEventListener("click", function () {
+        state.region = "全部";
+        state.language = "全部";
+        state.category = "全部";
+        state.expoQuarter = "全部";
+        state.activeCountryCode = null;
+        state.hoverCountryCode = null;
+        state.activeAnchor = null;
+        state.hoverAnchor = null;
+        renderPage();
+      });
+    }
+  }
+
+  function initializeMap() {
+    var mapNode = pageRoot.querySelector("[data-travel-map]");
+
+    if (!mapNode) {
+      return;
+    }
+
+    mapChart = window.echarts.init(mapNode);
+    mapChart.setOption(buildMapOption(currentView.visibleCountries), true);
+    lastSelectedCode = null;
+    syncMapSelection();
+
+    mapChart.on("mouseover", function (params) {
+      var code = extractCountryCode(params);
+
+      if (!code) {
+        return;
+      }
+
+      state.hoverCountryCode = code;
+      state.hoverAnchor = resolveAnchorFromParams(params);
+      syncHoverCard();
+    });
+
+    mapChart.on("mouseout", function (params) {
+      var code = extractCountryCode(params);
+
+      if (!code || state.hoverCountryCode !== code) {
+        return;
+      }
+
+      state.hoverCountryCode = null;
+      state.hoverAnchor = null;
+      syncHoverCard();
+    });
+
+    mapChart.on("click", function (params) {
+      var code = extractCountryCode(params);
+
+      if (!code) {
+        return;
+      }
+
+      state.activeCountryCode = code;
+      state.activeAnchor = resolveAnchorFromParams(params) || state.activeAnchor;
+      state.hoverCountryCode = code;
+      state.hoverAnchor = state.activeAnchor;
+      syncMapSelection();
+      syncHoverCard();
+    });
+
+    mapChart.getZr().on("mousemove", function (event) {
+      if (!state.hoverCountryCode) {
+        return;
+      }
+
+      state.hoverAnchor = resolveAnchorFromEvent(event);
+      positionHoverCard();
+    });
+
+    mapChart.getZr().on("globalout", function () {
+      state.hoverCountryCode = null;
+      state.hoverAnchor = null;
+      syncHoverCard();
+    });
+
+    if (!hasBoundResize) {
+      hasBoundResize = true;
+      window.addEventListener("resize", handleWindowResize);
+    }
+  }
+
+  function buildMapOption(visibleCountries) {
+    var values = visibleCountries.map(getCountryMapValue);
+    var maxValue = values.length ? Math.max.apply(null, values) : 1;
+
+    return {
+      animation: false,
+      tooltip: {
+        show: false
+      },
+      visualMap: {
+        min: 0,
+        max: maxValue,
+        show: false,
+        calculable: false,
+        inRange: {
+          color: ["#dfe7dd", "#97b88f", "#5e8b63"]
+        }
+      },
+      series: [
+        {
+          type: "map",
+          map: "world",
+          roam: true,
+          selectedMode: "single",
+          left: 8,
+          top: 8,
+          right: 8,
+          bottom: 8,
+          scaleLimit: {
+            min: 1,
+            max: 6
+          },
+          zoom: 1.08,
+          nameProperty: "name",
+          label: {
+            show: false
+          },
+          itemStyle: {
+            areaColor: "#d8d5cc",
+            borderColor: "#ffffff",
+            borderWidth: 0.8
+          },
+          emphasis: {
+            label: {
+              show: false
+            },
+            itemStyle: {
+              areaColor: "#d88b4f",
+              borderColor: "#ffffff",
+              borderWidth: 1.4
+            }
+          },
+          select: {
+            label: {
+              show: false
+            },
+            itemStyle: {
+              areaColor: "#c96a2d",
+              borderColor: "#ffffff",
+              borderWidth: 1.6
+            }
+          },
+          data: buildMapSeriesData(visibleCountries)
+        }
+      ]
+    };
+  }
+
+  function buildMapSeriesData(visibleCountries) {
+    return visibleCountries.map(function (country) {
+      return {
+        name: resolveMapCountryName(country),
+        value: getCountryMapValue(country),
+        countryCode: country.country_code,
+        selected: state.activeCountryCode === country.country_code
+      };
+    });
+  }
+
+  function syncMapSelection() {
+    if (!mapChart || !currentView) {
+      return;
+    }
+
+    if (lastSelectedCode === state.activeCountryCode) {
+      return;
+    }
+
+    lastSelectedCode = state.activeCountryCode;
+    mapChart.setOption({
+      series: [
+        {
+          data: buildMapSeriesData(currentView.visibleCountries)
+        }
+      ]
+    });
+  }
+
+  function syncHoverCard() {
+    var overlayNode = pageRoot.querySelector("[data-travel-overlay]");
+
+    if (!overlayNode || !currentView) {
+      return;
+    }
+
+    var country = getFocusCountry(currentView.visibleCountries);
+    overlayNode.innerHTML = buildHoverCard(country);
+    positionHoverCard();
+  }
+
+  function positionHoverCard() {
+    var overlayNode = pageRoot.querySelector("[data-travel-overlay]");
+    var shellNode = pageRoot.querySelector(".travel-map-shell");
+    var cardNode = overlayNode ? overlayNode.querySelector(".travel-hover-card") : null;
+
+    if (!overlayNode || !shellNode || !cardNode) {
+      return;
+    }
+
+    if (window.innerWidth <= 960) {
+      cardNode.style.left = "";
+      cardNode.style.top = "";
+      return;
+    }
+
+    var anchor = state.hoverAnchor || state.activeAnchor;
+    var shellWidth = shellNode.clientWidth;
+    var shellHeight = shellNode.clientHeight;
+    var cardWidth = cardNode.offsetWidth;
+    var cardHeight = cardNode.offsetHeight;
+    var padding = 16;
+    var x = shellWidth - cardWidth - padding;
+    var y = padding;
+
+    if (anchor) {
+      x = anchor.x + 18;
+      y = anchor.y + 18;
+
+      if (x + cardWidth > shellWidth - padding) {
+        x = anchor.x - cardWidth - 18;
+      }
+
+      if (y + cardHeight > shellHeight - padding) {
+        y = shellHeight - cardHeight - padding;
+      }
+    }
+
+    x = clamp(x, padding, Math.max(padding, shellWidth - cardWidth - padding));
+    y = clamp(y, padding, Math.max(padding, shellHeight - cardHeight - padding));
+    cardNode.style.left = String(x) + "px";
+    cardNode.style.top = String(y) + "px";
   }
 
   function buildSelectField(label, key, options, selectedValue) {
@@ -453,91 +689,98 @@
     });
   }
 
-  function getActiveCountry(filteredCountries) {
-    if (!state.activeCountryCode) {
+  function canRenderOnMap(country) {
+    return country.map_enabled_flag && !!resolveMapCountryName(country);
+  }
+
+  function resolveMapCountryName(country) {
+    var code = String(country && country.country_code || "").trim().toUpperCase();
+
+    if (!code) {
       return null;
     }
 
-    return filteredCountries.find(function (country) {
-      return country.country_code === state.activeCountryCode;
-    }) || null;
+    if (mapNameOverrides[code]) {
+      return mapNameOverrides[code];
+    }
+
+    if (!regionDisplayNames) {
+      return null;
+    }
+
+    return regionDisplayNames.of(code) || null;
   }
 
-  function getFocusCountry(activeCountry, visibleCountries) {
+  function getCountryMapValue(country) {
+    var focusWeights = {
+      核心: 340,
+      重点: 250,
+      观察: 160
+    };
+
+    return (focusWeights[country.focus_level] || 120)
+      + Math.min(country.news.length, 4) * 90
+      + Math.min(country.opportunities.length, 4) * 120
+      + Math.min(country.expos.length, 4) * 70;
+  }
+
+  function extractCountryCode(params) {
+    if (!params || !params.data || !params.data.countryCode) {
+      return null;
+    }
+
+    return String(params.data.countryCode || "").trim().toUpperCase() || null;
+  }
+
+  function resolveAnchorFromParams(params) {
+    if (!params || !params.event) {
+      return null;
+    }
+
+    return resolveAnchorFromEvent(params.event);
+  }
+
+  function resolveAnchorFromEvent(event) {
+    var nativeEvent = event && event.event ? event.event : event;
+    var x = nativeEvent && typeof nativeEvent.offsetX === "number" ? nativeEvent.offsetX : null;
+    var y = nativeEvent && typeof nativeEvent.offsetY === "number" ? nativeEvent.offsetY : null;
+
+    if ((x === null || y === null) && event) {
+      if (typeof event.offsetX === "number" && typeof event.offsetY === "number") {
+        x = event.offsetX;
+        y = event.offsetY;
+      } else if (typeof event.zrX === "number" && typeof event.zrY === "number") {
+        x = event.zrX;
+        y = event.zrY;
+      }
+    }
+
+    if (x === null || y === null) {
+      return null;
+    }
+
+    return { x: x, y: y };
+  }
+
+  function getFocusCountry(visibleCountries) {
     if (state.hoverCountryCode) {
       return visibleCountries.find(function (country) {
         return country.country_code === state.hoverCountryCode;
-      }) || activeCountry || null;
+      }) || null;
     }
 
-    return activeCountry || null;
+    if (state.activeCountryCode) {
+      return visibleCountries.find(function (country) {
+        return country.country_code === state.activeCountryCode;
+      }) || null;
+    }
+
+    return null;
   }
 
-  function buildWorldMapSvg(visibleCountries, mappedCountries) {
-    var visibleByCode = {};
-    var focusCode = state.hoverCountryCode || state.activeCountryCode;
-
-    visibleCountries.forEach(function (country) {
-      visibleByCode[country.country_code] = country;
-    });
-
-    return [
-      '<svg class="travel-map-svg" viewBox="0 0 960 520" aria-label="世界地图">',
-      '  <rect x="0" y="0" width="960" height="520" class="travel-map-ocean"></rect>',
-      '  <g class="travel-map-land">',
-      '    <path d="M118 104l46-30 72 18 38 30 30 10 24 34-6 34-46 18-24 48-52 8-42-22-12-38-48-38-10-36 30-36z"></path>',
-      '    <path d="M274 276l40 14 26 42 24 80-16 48-38 12-26-52-18-88-8-30z"></path>',
-      '    <path d="M404 86l52-16 78 10 56 42 8 34-40 32-36 8-10 20 24 30-16 26-44 8-34-16-26 6-34-20-26-46 4-40 32-34z"></path>',
-      '    <path d="M540 186l54-6 50 18 72 8 52 40 22 46-24 36-74 10-44-18-26 10-22-30-44-16-26-54z"></path>',
-      '    <path d="M734 338l56 8 52 20 34 42-28 26-72 8-54-20-18-42z"></path>',
-      '    <path d="M728 128l34-14 34 16 2 34-24 12-24-4-18-22z"></path>',
-      '  </g>',
-      '  <g class="travel-map-grid">',
-      '    <line x1="120" y1="52" x2="120" y2="458"></line>',
-      '    <line x1="280" y1="52" x2="280" y2="458"></line>',
-      '    <line x1="440" y1="52" x2="440" y2="458"></line>',
-      '    <line x1="600" y1="52" x2="600" y2="458"></line>',
-      '    <line x1="760" y1="52" x2="760" y2="458"></line>',
-      '    <line x1="80" y1="120" x2="880" y2="120"></line>',
-      '    <line x1="80" y1="220" x2="880" y2="220"></line>',
-      '    <line x1="80" y1="320" x2="880" y2="320"></line>',
-      '    <line x1="80" y1="420" x2="880" y2="420"></line>',
-      '  </g>',
-      '  <g class="travel-map-labels">',
-      '    <text x="170" y="92">北美</text>',
-      '    <text x="278" y="434">拉美</text>',
-      '    <text x="448" y="84">欧洲</text>',
-      '    <text x="588" y="174">中东</text>',
-      '    <text x="694" y="224">亚洲</text>',
-      '    <text x="764" y="430">大洋洲</text>',
-      '  </g>',
-      '  <g class="travel-map-hotspots">',
-      mappedCountries.map(function (country) {
-        var isVisible = !!visibleByCode[country.country_code];
-        var isFocused = focusCode === country.country_code;
-        var className = ["travel-map-hotspot", isVisible ? "travel-map-hotspot-active" : "travel-map-hotspot-muted", isFocused ? "travel-map-hotspot-selected" : ""].join(" ").trim();
-        var radius = getMarkerRadius(country.map_marker_size);
-        var labelY = country.map_y + country.map_label_dy;
-        var labelX = country.map_x + country.map_label_dx;
-        var attr = isVisible ? ' data-country-code="' + escapeHtml(country.country_code) + '" tabindex="0" role="button" aria-label="' + escapeHtml(country.country_name) + '"' : ' aria-hidden="true"';
-
-        return [
-          '<g class="' + escapeHtml(className) + '"' + attr + '>',
-          '  <circle cx="' + escapeHtml(String(country.map_x)) + '" cy="' + escapeHtml(String(country.map_y)) + '" r="' + escapeHtml(String(radius)) + '"></circle>',
-          '  <text x="' + escapeHtml(String(labelX)) + '" y="' + escapeHtml(String(labelY)) + '">' + escapeHtml(country.country_name) + '</text>',
-          '</g>'
-        ].join("");
-      }).join(""),
-      '  </g>',
-      '</svg>'
-    ].join("");
-  }
-
-  function buildHoverCard(activeCountry, visibleCountries) {
-    var country = getFocusCountry(activeCountry, visibleCountries);
-
+  function buildHoverCard(country) {
     if (!country) {
-      return '<div class="travel-hover-card travel-hover-empty">移动到地图热点上查看国家详情。页面不会再在地图外部单独展示国家卡片。</div>';
+      return '';
     }
 
     var primaryNews = resolvePrimaryNews(country.news);
@@ -659,93 +902,6 @@
     ].join("");
   }
 
-  function bindEvents(visibleCountries) {
-    var filterNodes = pageRoot.querySelectorAll("[data-travel-filter]");
-    var resetButton = pageRoot.querySelector("[data-travel-action='reset']");
-    var mapHotspots = pageRoot.querySelectorAll("[data-country-code]");
-    var visibleByCode = {};
-
-    visibleCountries.forEach(function (country) {
-      visibleByCode[country.country_code] = true;
-    });
-
-    Array.prototype.forEach.call(filterNodes, function (node) {
-      node.addEventListener("change", function (event) {
-        var filterKey = event.target.getAttribute("data-travel-filter");
-        state[filterKey] = event.target.value;
-        state.hoverCountryCode = null;
-        renderPage();
-      });
-    });
-
-    if (resetButton) {
-      resetButton.addEventListener("click", function () {
-        state.region = "全部";
-        state.language = "全部";
-        state.category = "全部";
-        state.expoQuarter = "全部";
-        state.activeCountryCode = null;
-        state.hoverCountryCode = null;
-        renderPage();
-      });
-    }
-
-    Array.prototype.forEach.call(mapHotspots, function (node) {
-      var code = node.getAttribute("data-country-code");
-
-      if (!visibleByCode[code]) {
-        return;
-      }
-
-      node.addEventListener("mouseenter", function () {
-        state.hoverCountryCode = code;
-        renderPage();
-      });
-
-      node.addEventListener("mouseleave", function () {
-        state.hoverCountryCode = null;
-        renderPage();
-      });
-
-      node.addEventListener("focus", function () {
-        state.hoverCountryCode = code;
-        renderPage();
-      });
-
-      node.addEventListener("blur", function () {
-        state.hoverCountryCode = null;
-        renderPage();
-      });
-
-      node.addEventListener("click", function () {
-        state.activeCountryCode = code;
-        state.hoverCountryCode = code;
-        renderPage();
-      });
-    });
-  }
-
-  function buildMetricCard(label, value, colorName, subtext) {
-    return [
-      '<div class="metric-card">',
-      '  <div class="metric-label">' + escapeHtml(label) + '</div>',
-      '  <div class="metric-value" style="color:var(--' + escapeHtml(colorName) + ');">' + escapeHtml(value) + '</div>',
-      '  <div class="metric-sub">' + escapeHtml(subtext) + '</div>',
-      '</div>'
-    ].join("");
-  }
-
-  function renderState(message, isError, error) {
-    document.title = "OOMS | 全球化旅业信息看板";
-    pageRoot.innerHTML = [
-      '<div class="page-state ' + (isError ? 'page-state-error' : '') + '">',
-      '  <div class="page-state-title">' + escapeHtml(isError ? '页面未能完成渲染' : '页面准备中') + '</div>',
-      '  <div class="page-state-copy">' + escapeHtml(message) + '</div>',
-      error ? '  <div class="page-state-detail mono">' + escapeHtml(String(error.message || error)) + '</div>' : '',
-      '</div>'
-    ].join("");
-  }
-
   function resolvePrimaryNews(newsItems) {
     if (!newsItems.length) {
       return null;
@@ -766,6 +922,46 @@
     }) || newsItems.find(function (item) {
       return item !== primaryNews;
     }) || null;
+  }
+
+  function handleWindowResize() {
+    if (mapChart) {
+      mapChart.resize();
+    }
+
+    window.requestAnimationFrame(positionHoverCard);
+  }
+
+  function destroyMapChart() {
+    if (!mapChart) {
+      return;
+    }
+
+    mapChart.dispose();
+    mapChart = null;
+    lastSelectedCode = null;
+  }
+
+  function renderState(message, isError, error) {
+    destroyMapChart();
+    document.title = "OOMS | 全球化旅业信息看板";
+    pageRoot.innerHTML = [
+      '<div class="page-state ' + (isError ? 'page-state-error' : '') + '">',
+      '  <div class="page-state-title">' + escapeHtml(isError ? '页面未能完成渲染' : '页面准备中') + '</div>',
+      '  <div class="page-state-copy">' + escapeHtml(message) + '</div>',
+      error ? '  <div class="page-state-detail mono">' + escapeHtml(String(error.message || error)) + '</div>' : '',
+      '</div>'
+    ].join("");
+  }
+
+  function indexCountriesByCode(countries) {
+    var result = {};
+
+    countries.forEach(function (country) {
+      result[country.country_code] = country;
+    });
+
+    return result;
   }
 
   function formatPopulation(value) {
@@ -814,19 +1010,6 @@
     return mapping[level] || "tag-gray";
   }
 
-  function countDistinct(items, key) {
-    var values = {};
-
-    items.forEach(function (item) {
-      var value = String(item[key] || "").trim();
-      if (value) {
-        values[value] = true;
-      }
-    });
-
-    return Object.keys(values).length;
-  }
-
   function toNumber(value) {
     var result = Number(value);
     return Number.isFinite(result) ? result : 0;
@@ -846,26 +1029,6 @@
     return normalized === "true" || normalized === "1" || normalized === "yes" || normalized === "y" || normalized === "是";
   }
 
-  function hasMapPosition(country) {
-    return Number.isFinite(country.map_x) && Number.isFinite(country.map_y);
-  }
-
-  function getMarkerRadius(size) {
-    if (size === "lg") {
-      return 14;
-    }
-
-    if (size === "md") {
-      return 12;
-    }
-
-    if (size === "xs") {
-      return 8;
-    }
-
-    return 10;
-  }
-
   function trimDecimal(value) {
     if (!Number.isFinite(value)) {
       return "-";
@@ -880,6 +1043,10 @@
     }
 
     return value.toFixed(2).replace(/0+$/, "").replace(/\.$/, "");
+  }
+
+  function clamp(value, min, max) {
+    return Math.min(Math.max(value, min), max);
   }
 
   function escapeHtml(value) {
