@@ -1,7 +1,10 @@
-country_code,expo_name,expo_start_date,expo_end_date,expo_quarter,expo_city,expo_note
-US,IPW,2026-05-17,2026-05-21,Q2,拉斯维加斯,北美旅游业重要B2B展会，适合对接目的地和分销资源。
-JP,Tourism Expo Japan,2026-09-24,2026-09-27,Q3,东京,日本旅业年度重点展会，覆盖目的地、航司和会奖资源。
-AE,Arabian Travel Market,2026-05-04,2026-05-07,Q2,迪拜,中东头部旅业展，适合观察中东出入境趋势和渠道资源。
-FR,IFTM Top Resa,2026-09-29,2026-10-01,Q3,巴黎,法国旅游行业重要展会，偏欧洲渠道和目的地合作。
-BR,WTM Latin America,2026-04-14,2026-04-16,Q2,圣保罗,拉美区域旅业合作展，适合了解区域联游和本地采购侧变化。
-SG,ITB Asia,2026-10-21,2026-10-23,Q4,新加坡,亚洲核心旅业展，适合看跨境流量、会奖和技术合作机会。
+country_code,expo_name,expo_start_date,expo_end_date,expo_quarter,expo_city,expo_schedule,expo_positioning,expo_buyer_type,expo_note
+SG,ITB Asia 2026（含 Travel Technology Asia）,2026-10-21,2026-10-23,Q4,新加坡 Sands Expo,2026年10月21日-23日 / 新加坡 Sands Expo,"亚太地区第一 B2B 旅游展，超 13,000+ 专业观众，1,300+ 预约买家",东南亚/日韩/澳新 OTA、MG Group、DidaTravel、区域批发商,"亚太地区第一 B2B 旅游展，超 13,000+ 专业观众，1,300+ 预约买家"
+GB,WTM London 2026（World Travel Market）,2026-11-03,2026-11-05,Q4,英国 London ExCeL,2026年11月3日-5日 / 英国 London ExCeL,"全球规模最大的 B2B 旅游交易会之一，43,000+ 参展专业人士",全球大型 Bedbank（Hotelbeds/WebBeds/RateHawk）、欧洲 TO（TUI/DER）,"全球规模最大的 B2B 旅游交易会之一，43,000+ 参展专业人士"
+ES,FITUR 2027,2027-01-20,2027-01-24,Q1,西班牙 Madrid IFEMA,2027年1月20日-24日 / 西班牙 Madrid IFEMA,"欧洲第二大展，拉丁美洲及南欧市场枢纽，150,000+ 专业观众",Restel、Hotelbeds、南欧与拉美旅游批发商,"欧洲第二大展，拉丁美洲及南欧市场枢纽，150,000+ 专业观众"
+AU,AIME 2027（Asia-Pacific Incentive）,,,Q1,澳大利亚 墨尔本,2027年2月中下旬 / 澳大利亚 墨尔本,亚太区首屈一指的 MICE 及商务奖励旅游 B2B 展会,澳新 FCTG、Helloworld、商务出差与奖励旅游采购商,亚太区首屈一指的 MICE 及商务奖励旅游 B2B 展会
+DE,ITB Berlin 2027,2027-03-16,2027-03-18,Q1,德国 Berlin Exhibition Grounds,2027年3月16日-18日 / 德国 Berlin Exhibition Grounds,"全球最顶级旅游展，设有专门的 Travel Technology 展馆，50,000+ B2B 买家",全球所有头部 OTA、Bedbank、Switch、GDS、API 整合商,"全球最顶级旅游展，设有专门的 Travel Technology 展馆，50,000+ B2B 买家"
+AE,Arabian Travel Market 2027（ATM）,,,Q2,阿联酋 迪拜 DWTC,2027年5月初 / 阿联酋 迪拜 DWTC,"中东及南亚第一 B2B 展，40,000+ 观众，奢华及商务游为主",Almosafer、TBO Holidays、Wego、中东豪客组团社,"中东及南亚第一 B2B 展，40,000+ 观众，奢华及商务游为主"
+CN,ITB China 2027,2027-05-25,2027-05-27,Q2,中国 上海世博展览馆,2027年5月25日-27日 / 中国 上海世博展览馆,"专注于中国入境及出境游的 B2B 垂直展，1,500+ 精选买家",赴华旅游海外买家（Hosted Buyers）、海外 OTA 驻华采购代表,"专注于中国入境及出境游的 B2B 垂直展，1,500+ 精选买家"
+GB,TravelTech Show 2027,,,Q2,英国 伦敦,2027年6月下旬 / 英国 伦敦,垂直于旅游科技、API 接口、Distribution Switch 的专项展览,OTA CTO/CIO、API 产品总监、Bedbank 供给拓展 VP,垂直于旅游科技、API 接口、Distribution Switch 的专项展览
+SG,ILTM Asia Pacific 2027,,,Q3,新加坡 Sands Expo,2027年7月上旬 / 新加坡 Sands Expo,亚太奢华旅游展，邀约制高净值 B2B 买家,奢华定制社、顶级私人旅行顾问、高端商务地接,亚太奢华旅游展，邀约制高净值 B2B 买家

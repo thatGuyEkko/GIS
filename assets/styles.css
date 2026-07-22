@@ -1245,53 +1245,97 @@ tbody tr:last-child td {
 }
 
 .travel-map-shell {
-  position: relative;
-  min-height: 640px;
+  --travel-map-shell-height: clamp(460px, 60vh, 620px);
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(320px, 1fr);
   border-radius: 8px;
-  background: linear-gradient(180deg, #edf4fb 0%, #f7f2e8 100%);
   border: 1px solid var(--border);
   overflow: hidden;
+  background: #fff;
+  min-height: var(--travel-map-shell-height);
+}
+
+.travel-map-stage {
+  min-width: 0;
+  min-height: 0;
+  height: var(--travel-map-shell-height);
+  background: linear-gradient(180deg, #edf4fb 0%, #f7f2e8 100%);
 }
 
 .travel-map-canvas {
   width: 100%;
-  height: 640px;
+  height: 100%;
 }
 
-.travel-map-overlay {
-  position: absolute;
-  inset: 0;
+.travel-info-panel {
+  min-width: 0;
+  min-height: var(--travel-map-shell-height);
   display: flex;
-  align-items: flex-start;
-  justify-content: flex-end;
-  padding: 16px;
-  pointer-events: none;
+  flex-direction: column;
+  border-left: 1px solid var(--border);
+  background: rgba(252, 249, 243, 0.92);
+}
+
+.travel-info-panel-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  overflow: hidden;
+  padding: 18px;
+}
+
+.travel-info-panel-body > * {
+  width: 100%;
+  min-height: 0;
 }
 
 .travel-hover-card {
-  position: relative;
-  z-index: 2;
   display: grid;
   gap: 12px;
-  width: min(420px, calc(100% - 32px));
-  max-height: calc(100% - 32px);
-  margin-left: auto;
+  width: 100%;
+  min-height: 0;
+  max-height: 100%;
+  padding: 16px;
   overflow: auto;
   overscroll-behavior: contain;
   scrollbar-gutter: stable;
-  padding: 16px;
   background: rgba(255, 255, 255, 0.96);
   border: 1px solid var(--border);
   border-radius: 8px;
   box-shadow: 0 12px 28px rgba(36, 36, 36, 0.08);
-  backdrop-filter: blur(8px);
-  pointer-events: auto;
+  box-sizing: border-box;
 }
 
-.travel-hover-empty {
-  color: var(--text-muted);
+.travel-info-empty {
+  width: 100%;
+  min-height: 100%;
+  display: grid;
+  align-content: center;
+  gap: 10px;
+  padding: 16px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px dashed #dbc9f0;
+  box-sizing: border-box;
+}
+
+.travel-info-empty-kicker {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--purple);
+}
+
+.travel-info-empty-title {
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--text);
+}
+
+.travel-info-empty-copy {
   font-size: 12px;
-  line-height: 1.6;
+  color: var(--text-sub);
+  line-height: 1.7;
 }
 
 .travel-hover-head {
@@ -1311,6 +1355,13 @@ tbody tr:last-child td {
 .travel-hover-meta {
   font-size: 11px;
   color: var(--text-muted);
+}
+
+.travel-hover-tip {
+  margin-top: 8px;
+  font-size: 11px;
+  color: var(--purple);
+  line-height: 1.6;
 }
 
 .travel-hover-stats {
@@ -1357,6 +1408,17 @@ tbody tr:last-child td {
   color: var(--text-muted);
 }
 
+.travel-hover-subsection {
+  display: grid;
+  gap: 8px;
+}
+
+.travel-hover-subtitle {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text);
+}
+
 .travel-hover-list {
   display: grid;
   gap: 8px;
@@ -1389,6 +1451,11 @@ tbody tr:last-child td {
   line-height: 1.6;
 }
 
+.travel-hover-record-key {
+  color: var(--text);
+  font-weight: 600;
+}
+
 @media (max-width: 1280px) {
   .metrics,
   .grid-4 {
@@ -1410,6 +1477,10 @@ tbody tr:last-child td {
 
   .travel-filter-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .travel-map-shell {
+    grid-template-columns: minmax(0, 1.7fr) minmax(300px, 1fr);
   }
 }
 
@@ -1495,25 +1566,27 @@ tbody tr:last-child td {
   }
 
   .travel-map-shell {
-    min-height: 520px;
+    --travel-map-shell-height: 420px;
+    grid-template-columns: 1fr;
+    min-height: auto;
   }
 
-  .travel-hover-card {
-    position: static;
-    width: 100%;
-    margin-top: 14px;
-  }
-
-  .travel-map-canvas {
+  .travel-map-stage {
     height: 420px;
   }
 
-  .travel-map-overlay {
-    position: static;
-    display: block;
-    inset: auto;
-    pointer-events: auto;
-    padding: 0;
+  .travel-map-canvas {
+    height: 100%;
+  }
+
+  .travel-info-panel {
+    min-height: 0;
+    border-left: none;
+    border-top: 1px solid var(--border);
+  }
+
+  .travel-info-panel-body {
+    max-height: 520px;
   }
 
   .bar-row,
@@ -1545,11 +1618,20 @@ tbody tr:last-child td {
   }
 
   .travel-map-shell {
-    min-height: 440px;
+    --travel-map-shell-height: 360px;
   }
 
   .travel-map-canvas {
-    height: 360px;
+    height: 100%;
+  }
+
+  .travel-info-panel-body {
+    padding: 16px;
+    max-height: none;
+  }
+
+  .travel-info-empty-title {
+    font-size: 16px;
   }
 
   th,

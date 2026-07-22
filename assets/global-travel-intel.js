@@ -6,9 +6,6 @@
   var currentView = null;
   var hasBoundResize = false;
   var lastSelectedCode = null;
-  var hoverCardHideTimer = 0;
-  var isHoverCardHovered = false;
-  var HOVER_CARD_HIDE_DELAY = 600;
   var regionDisplayNames = typeof Intl !== "undefined" && typeof Intl.DisplayNames === "function"
     ? new Intl.DisplayNames(["en"], { type: "region" })
     : null;
@@ -65,7 +62,8 @@
   var dataFiles = {
     countries: dataPrefix + "travel_intel_countries.csv",
     news: dataPrefix + "travel_intel_news.csv",
-    opportunities: dataPrefix + "travel_intel_opportunities.csv",
+    leads: dataPrefix + "leads.csv",
+    opportunities: dataPrefix + "opportunities.csv",
     expos: dataPrefix + "travel_intel_expos.csv"
   };
 
@@ -74,7 +72,7 @@
     region: "全部",
     language: "全部",
     category: "全部",
-    activeCountryCode: null,
+    lockedCountryCode: null,
     hoverCountryCode: null
   };
 
@@ -91,15 +89,16 @@
   Promise.all([
     loadCsv(dataFiles.countries),
     loadCsv(dataFiles.news),
+    loadCsv(dataFiles.leads),
     loadCsv(dataFiles.opportunities),
     loadCsv(dataFiles.expos)
   ])
     .then(function (results) {
-      store = buildStore(results[0], results[1], results[2], results[3]);
+      store = buildStore(results[0], results[1], results[2], results[3], results[4]);
       renderPage();
     })
     .catch(function (error) {
-      renderState("全球化旅业信息数据加载失败，请检查 data 目录下的 travel_intel_*.csv 与本地服务。", true, error);
+      renderState("全球化旅业信息数据加载失败，请检查 data 目录下的 travel_intel_*.csv、leads.csv、opportunities.csv 与本地服务。", true, error);
     });
 
   function loadCsv(url) {
@@ -181,7 +180,7 @@
     });
   }
 
-  function buildStore(countryRows, newsRows, opportunityRows, expoRows) {
+  function buildStore(countryRows, newsRows, leadRows, opportunityRows, expoRows) {
     var countries = countryRows.map(function (item) {
       var country = {
         country_code: String(item.country_code || "").trim().toUpperCase(),
@@ -198,6 +197,7 @@
         map_enabled_flag: toBoolean(item.map_enabled_flag),
         display_order: toOptionalNumber(item.display_order),
         news: [],
+        leads: [],
         opportunities: [],
         expos: []
       };
@@ -232,18 +232,36 @@
       });
     });
 
+    leadRows.forEach(function (item) {
+      var country = countriesByCode[String(item.country || "").trim().toUpperCase()];
+
+      if (!country) {
+        return;
+      }
+
+      country.leads.push({
+        name: String(item.name || "").trim(),
+        type: String(item.type || "").trim() || "未分类",
+        bg: String(item.bg || "").trim(),
+        source: String(item.source || "").trim(),
+        copy: String(item.copy || "").trim()
+      });
+    });
+
     opportunityRows.forEach(function (item) {
-      var country = countriesByCode[String(item.country_code || "").trim().toUpperCase()];
+      var country = countriesByCode[String(item.country || "").trim().toUpperCase()];
 
       if (!country) {
         return;
       }
 
       country.opportunities.push({
-        opportunity_category: String(item.opportunity_category || "").trim() || "未分类",
-        opportunity_title: String(item.opportunity_title || "").trim(),
-        summary: String(item.summary || "").trim(),
-        priority_level: String(item.priority_level || "").trim() || "观察"
+        name: String(item.name || "").trim(),
+        type: String(item.type || "").trim() || "未分类",
+        bg: String(item.bg || "").trim(),
+        source: String(item.source || "").trim(),
+        copy: String(item.copy || "").trim(),
+        status: String(item.status || "").trim() || "待更新"
       });
     });
 
@@ -260,6 +278,9 @@
         expo_end_date: String(item.expo_end_date || "").trim(),
         expo_quarter: String(item.expo_quarter || "").trim() || "未标记",
         expo_city: String(item.expo_city || "").trim(),
+        expo_schedule: String(item.expo_schedule || "").trim(),
+        expo_positioning: String(item.expo_positioning || item.expo_note || "").trim(),
+        expo_buyer_type: String(item.expo_buyer_type || "").trim(),
         expo_note: String(item.expo_note || "").trim()
       });
     });
@@ -279,10 +300,10 @@
     var filteredCountries = getFilteredCountries(store.countries);
     var visibleCountries = filteredCountries.filter(canRenderOnMap);
 
-    if (state.activeCountryCode && !visibleCountries.some(function (country) {
-      return country.country_code === state.activeCountryCode;
+    if (state.lockedCountryCode && !visibleCountries.some(function (country) {
+      return country.country_code === state.lockedCountryCode;
     })) {
-      state.activeCountryCode = null;
+      state.lockedCountryCode = null;
     }
 
     if (state.hoverCountryCode && !visibleCountries.some(function (country) {
@@ -316,7 +337,7 @@
       '  <div class="travel-filter-grid">',
       buildSelectField("区域", "region", filters.regions, state.region),
       buildSelectField("官方语言", "language", filters.languages, state.language),
-      buildSelectField("机会点类别", "category", filters.categories, state.category),
+      buildSelectField("商机 / 线索类型", "category", filters.categories, state.category),
       '  </div>',
       '</section>',
       '<section class="travel-map-card section">',
@@ -324,8 +345,12 @@
       '    <div class="section-title">主地图看板</div>',
       '  </div>',
       '  <div class="travel-map-shell">',
-      '    <div class="travel-map-canvas" data-travel-map aria-label="世界地图"></div>',
-      '    <div class="travel-map-overlay" data-travel-overlay></div>',
+      '    <div class="travel-map-stage">',
+      '      <div class="travel-map-canvas" data-travel-map aria-label="世界地图"></div>',
+      '    </div>',
+      '    <aside class="travel-info-panel" aria-live="polite">',
+      '      <div class="travel-info-panel-body" data-travel-info></div>',
+      '    </aside>',
       '  </div>',
       '</section>'
     ].join("");
@@ -357,9 +382,7 @@
       node.addEventListener("change", function (event) {
         var filterKey = event.target.getAttribute("data-travel-filter");
         state[filterKey] = event.target.value;
-        cancelHoverCardHide();
-        isHoverCardHovered = false;
-        state.activeCountryCode = null;
+        state.lockedCountryCode = null;
         state.hoverCountryCode = null;
         renderPage();
       });
@@ -370,9 +393,7 @@
         state.region = "全部";
         state.language = "全部";
         state.category = "全部";
-        cancelHoverCardHide();
-        isHoverCardHovered = false;
-        state.activeCountryCode = null;
+        state.lockedCountryCode = null;
         state.hoverCountryCode = null;
         renderPage();
       });
@@ -381,7 +402,6 @@
 
   function initializeMap() {
     var mapNode = pageRoot.querySelector("[data-travel-map]");
-    var shellNode = pageRoot.querySelector(".travel-map-shell");
 
     if (!mapNode) {
       return;
@@ -399,7 +419,15 @@
         return;
       }
 
-      setFocusedCountry(code);
+      if (state.hoverCountryCode === code) {
+        return;
+      }
+
+      state.hoverCountryCode = code;
+
+      if (!state.lockedCountryCode) {
+        syncHoverCard();
+      }
     });
 
     mapChart.on("mouseout", function (params) {
@@ -410,7 +438,10 @@
       }
 
       state.hoverCountryCode = null;
-      scheduleHoverCardHide();
+
+      if (!state.lockedCountryCode) {
+        syncHoverCard();
+      }
     });
 
     mapChart.on("click", function (params) {
@@ -420,20 +451,20 @@
         return;
       }
 
-      setFocusedCountry(code);
+      toggleLockedCountry(code);
     });
 
     mapChart.getZr().on("globalout", function () {
-      state.hoverCountryCode = null;
-      scheduleHoverCardHide();
-    });
+      if (!state.hoverCountryCode) {
+        return;
+      }
 
-    if (shellNode) {
-      shellNode.addEventListener("mouseleave", function () {
-        isHoverCardHovered = false;
-        clearFocusedCountry();
-      });
-    }
+      state.hoverCountryCode = null;
+
+      if (!state.lockedCountryCode) {
+        syncHoverCard();
+      }
+    });
 
     if (!hasBoundResize) {
       hasBoundResize = true;
@@ -515,7 +546,7 @@
         name: resolveMapCountryName(country),
         value: getCountryMapValue(country),
         countryCode: country.country_code,
-        selected: state.activeCountryCode === country.country_code
+        selected: state.lockedCountryCode === country.country_code
       };
     });
   }
@@ -525,11 +556,11 @@
       return;
     }
 
-    if (lastSelectedCode === state.activeCountryCode) {
+    if (lastSelectedCode === state.lockedCountryCode) {
       return;
     }
 
-    lastSelectedCode = state.activeCountryCode;
+    lastSelectedCode = state.lockedCountryCode;
     mapChart.setOption({
       series: [
         {
@@ -540,15 +571,14 @@
   }
 
   function syncHoverCard() {
-    var overlayNode = pageRoot.querySelector("[data-travel-overlay]");
+    var panelNode = pageRoot.querySelector("[data-travel-info]");
 
-    if (!overlayNode || !currentView) {
+    if (!panelNode || !currentView) {
       return;
     }
 
-    var country = getFocusCountry(currentView.visibleCountries);
-    overlayNode.innerHTML = buildHoverCard(country);
-    bindHoverCardEvents(overlayNode);
+    var country = getDisplayedCountry(currentView.visibleCountries);
+    panelNode.innerHTML = buildHoverCard(country);
   }
 
   function buildSelectField(label, key, options, selectedValue) {
@@ -570,7 +600,8 @@
       regions: ["全部"].concat(uniqueValues(countries, function (country) { return country.region_name; })),
       languages: ["全部"].concat(uniqueValues(countries, function (country) { return country.official_language; })),
       categories: ["全部"].concat(uniqueValues(countries, function (country) {
-        return country.opportunities.map(function (item) { return item.opportunity_category; });
+        return country.leads.map(function (item) { return item.type; })
+          .concat(country.opportunities.map(function (item) { return item.type; }));
       }, true))
     };
   }
@@ -606,8 +637,10 @@
       }
 
       if (state.category !== "全部") {
-        var hasCategory = country.opportunities.some(function (item) {
-          return item.opportunity_category === state.category;
+        var hasCategory = country.leads.some(function (item) {
+          return item.type === state.category;
+        }) || country.opportunities.some(function (item) {
+          return item.type === state.category;
         });
 
         if (!hasCategory) {
@@ -650,6 +683,7 @@
 
     return (focusWeights[country.focus_level] || 120)
       + Math.min(country.news.length, 4) * 90
+      + Math.min(country.leads.length, 3) * 80
       + Math.min(country.opportunities.length, 4) * 120
       + Math.min(country.expos.length, 4) * 70;
   }
@@ -662,10 +696,12 @@
     return String(params.data.countryCode || "").trim().toUpperCase() || null;
   }
 
-  function getFocusCountry(visibleCountries) {
-    if (state.activeCountryCode) {
+  function getDisplayedCountry(visibleCountries) {
+    var displayCode = state.lockedCountryCode || state.hoverCountryCode;
+
+    if (displayCode) {
       return visibleCountries.find(function (country) {
-        return country.country_code === state.activeCountryCode;
+        return country.country_code === displayCode;
       }) || null;
     }
 
@@ -674,11 +710,14 @@
 
   function buildHoverCard(country) {
     if (!country) {
-      return '';
+      return buildHoverEmptyState();
     }
 
     var primaryNews = resolvePrimaryNews(country.news);
     var relatedNews = resolveRelatedNews(country.news, primaryNews);
+    var interactionState = state.lockedCountryCode === country.country_code
+      ? "已锁定，点击地图中的同一国家可取消锁定。"
+      : "当前为悬停预览，点击该国家可锁定信息。";
 
     return [
       '<div class="travel-hover-card" tabindex="0">',
@@ -686,6 +725,7 @@
       '    <div>',
       '      <div class="travel-hover-country">' + escapeHtml(country.country_name) + '</div>',
       '      <div class="travel-hover-meta">' + escapeHtml(country.region_name) + (country.sub_region_name ? ' / ' + escapeHtml(country.sub_region_name) : '') + ' / ' + escapeHtml(country.official_language) + '</div>',
+      '      <div class="travel-hover-tip">' + escapeHtml(interactionState) + '</div>',
       '    </div>',
       '    <span class="tag ' + escapeHtml(getFocusTagClass(country.focus_level)) + '">' + escapeHtml(country.focus_level) + '</span>',
       '  </div>',
@@ -698,8 +738,18 @@
       buildHoverSection("市场概况", country.tourism_overview || "待补充"),
       buildHoverNewsSection("旅游业重要新闻信息", primaryNews),
       buildHoverNewsSection("关联的重要新闻信息", relatedNews),
-      buildHoverOpportunitySection(country),
+      buildHoverBusinessSection(country),
       buildHoverExpoSection(country),
+      '</div>'
+    ].join("");
+  }
+
+  function buildHoverEmptyState() {
+    return [
+      '<div class="travel-info-empty">',
+      '  <div class="travel-info-empty-kicker">国家信息面板</div>',
+      '  <div class="travel-info-empty-title">先将鼠标悬停到地图中的国家上</div>',
+      '  <div class="travel-info-empty-copy">悬停会展示对应国家的商机、线索、新闻与展会信息；点击国家可锁定，再次点击同一国家可取消锁定。</div>',
       '</div>'
     ].join("");
   }
@@ -747,23 +797,49 @@
     ].join("");
   }
 
-  function buildHoverOpportunitySection(country) {
-    var records = country.opportunities.slice(0, 2).map(function (item) {
-      return [
-        '<div class="travel-hover-record">',
-        '  <div class="travel-hover-record-title">' + escapeHtml(item.opportunity_title || item.opportunity_category || "待补充") + '</div>',
-        '  <div class="travel-hover-record-meta">' + escapeHtml(item.opportunity_category || "未分类") + ' / ' + escapeHtml(item.priority_level || "观察") + '</div>',
-        '  <div class="travel-hover-record-copy">' + escapeHtml(item.summary || "待补充") + '</div>',
-        '</div>'
-      ].join("");
-    }).join("");
+  function buildHoverBusinessSection(country) {
+    var leadRecords = country.leads.slice(0, 3).map(buildHoverLeadRecord).join("");
+    var opportunityRecords = country.opportunities.slice(0, 3).map(buildHoverOpportunityRecord).join("");
 
     return [
       '<div class="travel-hover-section">',
-      '  <div class="travel-hover-section-title">机会点信息</div>',
-      '  <div class="travel-hover-copy">' + escapeHtml(country.opportunity_summary || "待补充") + '</div>',
-      records ? '  <div class="travel-hover-list">' + records + '</div>' : '',
-      !records ? '<div class="travel-hover-record empty-note">当前国家暂无机会点明细</div>' : '',
+      '  <div class="travel-hover-section-title">商机与线索展示</div>',
+      buildHoverSubsection("线索", leadRecords || '<div class="travel-hover-record empty-note">当前国家暂无线索数据</div>'),
+      buildHoverSubsection("商机", opportunityRecords || '<div class="travel-hover-record empty-note">当前国家暂无商机数据</div>'),
+      '</div>'
+    ].join("");
+  }
+
+  function buildHoverSubsection(title, content) {
+    return [
+      '<div class="travel-hover-subsection">',
+      '  <div class="travel-hover-subtitle">' + escapeHtml(title) + '</div>',
+      '  <div class="travel-hover-list">' + content + '</div>',
+      '</div>'
+    ].join("");
+  }
+
+  function buildHoverLeadRecord(item) {
+    var bgSource = [item.bg, item.source].filter(Boolean).join(" / ");
+
+    return [
+      '<div class="travel-hover-record">',
+      '  <div class="travel-hover-record-title">' + escapeHtml(item.name || "待补充") + '</div>',
+      '  <div class="travel-hover-record-meta">' + escapeHtml(item.type || "未分类") + '</div>',
+      buildHoverRecordDetail("文案说明", item.copy || "待补充"),
+      buildHoverRecordDetail("BG来源", bgSource || "待补充"),
+      '</div>'
+    ].join("");
+  }
+
+  function buildHoverOpportunityRecord(item) {
+    return [
+      '<div class="travel-hover-record">',
+      '  <div class="travel-hover-record-title">' + escapeHtml(item.name || "待补充") + '</div>',
+      '  <div class="travel-hover-record-meta">' + escapeHtml(item.type || "未分类") + '</div>',
+      buildHoverRecordDetail("BG", item.bg || "待补充"),
+      buildHoverRecordDetail("文案说明", item.copy || "待补充"),
+      buildHoverRecordDetail("Status", item.status || "待更新"),
       '</div>'
     ].join("");
   }
@@ -772,7 +848,7 @@
     if (!country.expos.length) {
       return [
         '<div class="travel-hover-section">',
-        '  <div class="travel-hover-section-title">旅游业展会信息</div>',
+        '  <div class="travel-hover-section-title">重点展会信息</div>',
         '  <div class="travel-hover-record empty-note">当前国家暂无展会数据</div>',
         '</div>'
       ].join("");
@@ -780,14 +856,27 @@
 
     return [
       '<div class="travel-hover-section">',
-      '  <div class="travel-hover-section-title">旅游业展会信息</div>',
+      '  <div class="travel-hover-section-title">重点展会信息</div>',
       '  <div class="travel-hover-list">',
       country.expos.slice(0, 3).map(function (item) {
+        var scheduleParts = [];
+
+        if (item.expo_start_date || item.expo_end_date) {
+          scheduleParts.push(formatDateRange(item.expo_start_date, item.expo_end_date));
+        }
+
+        if (item.expo_city) {
+          scheduleParts.push(item.expo_city);
+        }
+
+        var schedule = item.expo_schedule || scheduleParts.join(" / ") || "待补充";
+
         return [
           '<div class="travel-hover-record">',
           '  <div class="travel-hover-record-title">' + escapeHtml(item.expo_name || "待补充") + '</div>',
-          '  <div class="travel-hover-record-meta">' + escapeHtml(formatDateRange(item.expo_start_date, item.expo_end_date)) + (item.expo_city ? ' / ' + escapeHtml(item.expo_city) : '') + '</div>',
-          '  <div class="travel-hover-record-copy">' + escapeHtml(item.expo_note || "待补充") + '</div>',
+          '  <div class="travel-hover-record-meta">' + escapeHtml(schedule || "待补充") + '</div>',
+          buildHoverRecordDetail("展会定位与规模", item.expo_positioning || item.expo_note || "待补充"),
+          buildHoverRecordDetail("适配采购商类型", item.expo_buyer_type || "待补充"),
           '</div>'
         ].join("");
       }).join(""),
@@ -818,73 +907,29 @@
     }) || null;
   }
 
-  function setFocusedCountry(code) {
+  function buildHoverRecordDetail(label, value) {
+    return [
+      '<div class="travel-hover-record-copy">',
+      '  <span class="travel-hover-record-key">' + escapeHtml(label) + '：</span>',
+      escapeHtml(value || "待补充"),
+      '</div>'
+    ].join("");
+  }
+
+  function toggleLockedCountry(code) {
     if (!code) {
       return;
     }
 
-    cancelHoverCardHide();
-    state.hoverCountryCode = code;
-    state.activeCountryCode = code;
+    if (state.lockedCountryCode === code) {
+      state.lockedCountryCode = null;
+    } else {
+      state.lockedCountryCode = code;
+      state.hoverCountryCode = code;
+    }
+
     syncMapSelection();
     syncHoverCard();
-  }
-
-  function clearFocusedCountry() {
-    if (!state.activeCountryCode && !state.hoverCountryCode) {
-      cancelHoverCardHide();
-      return;
-    }
-
-    cancelHoverCardHide();
-    state.activeCountryCode = null;
-    state.hoverCountryCode = null;
-    syncMapSelection();
-    syncHoverCard();
-  }
-
-  function scheduleHoverCardHide() {
-    if (isHoverCardHovered) {
-      return;
-    }
-
-    cancelHoverCardHide();
-    hoverCardHideTimer = window.setTimeout(function () {
-      hoverCardHideTimer = 0;
-
-      if (state.hoverCountryCode || isHoverCardHovered) {
-        return;
-      }
-
-      clearFocusedCountry();
-    }, HOVER_CARD_HIDE_DELAY);
-  }
-
-  function cancelHoverCardHide() {
-    if (!hoverCardHideTimer) {
-      return;
-    }
-
-    window.clearTimeout(hoverCardHideTimer);
-    hoverCardHideTimer = 0;
-  }
-
-  function bindHoverCardEvents(overlayNode) {
-    var cardNode = overlayNode.querySelector(".travel-hover-card");
-
-    if (!cardNode) {
-      return;
-    }
-
-    cardNode.addEventListener("mouseenter", function () {
-      isHoverCardHovered = true;
-      cancelHoverCardHide();
-    });
-
-    cardNode.addEventListener("mouseleave", function () {
-      isHoverCardHovered = false;
-      scheduleHoverCardHide();
-    });
   }
 
   function handleWindowResize() {
