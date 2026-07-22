@@ -7,26 +7,64 @@
     }
   }
 
+  function applyEmbeddedLayout() {
+    if (!inShellFrame()) {
+      return;
+    }
+
+    if (document.body) {
+      document.body.classList.add('content-embedded');
+    }
+  }
+
+  function getPrimaryContentNode() {
+    return document.querySelector('main') || document.body;
+  }
+
+  function getContentHeight() {
+    var node = getPrimaryContentNode();
+
+    if (!node) {
+      return 0;
+    }
+
+    var rect = node.getBoundingClientRect();
+    var style = window.getComputedStyle(node);
+    var marginTop = parseFloat(style.marginTop) || 0;
+    var marginBottom = parseFloat(style.marginBottom) || 0;
+
+    return Math.ceil(rect.height + marginTop + marginBottom);
+  }
+
   function notifyHeight() {
     if (!inShellFrame()) {
       return;
     }
 
     try {
-      window.parent.postMessage({ type: 'ooms:resize' }, window.location.origin);
+      window.parent.postMessage({
+        type: 'ooms:resize',
+        height: getContentHeight()
+      }, window.location.origin);
     } catch (error) {
       return;
     }
   }
 
-  window.addEventListener('load', notifyHeight);
-  window.addEventListener('resize', notifyHeight);
+  applyEmbeddedLayout();
+  window.addEventListener('load', function () {
+    window.requestAnimationFrame(notifyHeight);
+  });
+  window.addEventListener('resize', function () {
+    window.requestAnimationFrame(notifyHeight);
+  });
 
-  if (window.ResizeObserver && document.body) {
+  if (window.ResizeObserver) {
+    var observedNode = getPrimaryContentNode();
     var observer = new ResizeObserver(notifyHeight);
-    observer.observe(document.body);
-    if (document.documentElement) {
-      observer.observe(document.documentElement);
+
+    if (observedNode) {
+      observer.observe(observedNode);
     }
   }
 

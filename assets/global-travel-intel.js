@@ -6,6 +6,9 @@
   var currentView = null;
   var hasBoundResize = false;
   var lastSelectedCode = null;
+  var hoverCardHideTimer = 0;
+  var isHoverCardHovered = false;
+  var HOVER_CARD_HIDE_DELAY = 600;
   var regionDisplayNames = typeof Intl !== "undefined" && typeof Intl.DisplayNames === "function"
     ? new Intl.DisplayNames(["en"], { type: "region" })
     : null;
@@ -71,11 +74,8 @@
     region: "全部",
     language: "全部",
     category: "全部",
-    expoQuarter: "全部",
     activeCountryCode: null,
-    hoverCountryCode: null,
-    activeAnchor: null,
-    hoverAnchor: null
+    hoverCountryCode: null
   };
 
   if (window.location.protocol === "file:") {
@@ -283,14 +283,12 @@
       return country.country_code === state.activeCountryCode;
     })) {
       state.activeCountryCode = null;
-      state.activeAnchor = null;
     }
 
     if (state.hoverCountryCode && !visibleCountries.some(function (country) {
       return country.country_code === state.hoverCountryCode;
     })) {
       state.hoverCountryCode = null;
-      state.hoverAnchor = null;
     }
 
     currentView = {
@@ -319,7 +317,6 @@
       buildSelectField("区域", "region", filters.regions, state.region),
       buildSelectField("官方语言", "language", filters.languages, state.language),
       buildSelectField("机会点类别", "category", filters.categories, state.category),
-      buildSelectField("展会周期", "expoQuarter", filters.expoQuarters, state.expoQuarter),
       '  </div>',
       '</section>',
       '<section class="travel-map-card section">',
@@ -360,10 +357,10 @@
       node.addEventListener("change", function (event) {
         var filterKey = event.target.getAttribute("data-travel-filter");
         state[filterKey] = event.target.value;
+        cancelHoverCardHide();
+        isHoverCardHovered = false;
         state.activeCountryCode = null;
         state.hoverCountryCode = null;
-        state.activeAnchor = null;
-        state.hoverAnchor = null;
         renderPage();
       });
     });
@@ -373,11 +370,10 @@
         state.region = "全部";
         state.language = "全部";
         state.category = "全部";
-        state.expoQuarter = "全部";
+        cancelHoverCardHide();
+        isHoverCardHovered = false;
         state.activeCountryCode = null;
         state.hoverCountryCode = null;
-        state.activeAnchor = null;
-        state.hoverAnchor = null;
         renderPage();
       });
     }
@@ -385,6 +381,7 @@
 
   function initializeMap() {
     var mapNode = pageRoot.querySelector("[data-travel-map]");
+    var shellNode = pageRoot.querySelector(".travel-map-shell");
 
     if (!mapNode) {
       return;
@@ -402,9 +399,7 @@
         return;
       }
 
-      state.hoverCountryCode = code;
-      state.hoverAnchor = resolveAnchorFromParams(params);
-      syncHoverCard();
+      setFocusedCountry(code);
     });
 
     mapChart.on("mouseout", function (params) {
@@ -415,8 +410,7 @@
       }
 
       state.hoverCountryCode = null;
-      state.hoverAnchor = null;
-      syncHoverCard();
+      scheduleHoverCardHide();
     });
 
     mapChart.on("click", function (params) {
@@ -426,28 +420,20 @@
         return;
       }
 
-      state.activeCountryCode = code;
-      state.activeAnchor = resolveAnchorFromParams(params) || state.activeAnchor;
-      state.hoverCountryCode = code;
-      state.hoverAnchor = state.activeAnchor;
-      syncMapSelection();
-      syncHoverCard();
-    });
-
-    mapChart.getZr().on("mousemove", function (event) {
-      if (!state.hoverCountryCode) {
-        return;
-      }
-
-      state.hoverAnchor = resolveAnchorFromEvent(event);
-      positionHoverCard();
+      setFocusedCountry(code);
     });
 
     mapChart.getZr().on("globalout", function () {
       state.hoverCountryCode = null;
-      state.hoverAnchor = null;
-      syncHoverCard();
+      scheduleHoverCardHide();
     });
+
+    if (shellNode) {
+      shellNode.addEventListener("mouseleave", function () {
+        isHoverCardHovered = false;
+        clearFocusedCountry();
+      });
+    }
 
     if (!hasBoundResize) {
       hasBoundResize = true;
@@ -562,50 +548,7 @@
 
     var country = getFocusCountry(currentView.visibleCountries);
     overlayNode.innerHTML = buildHoverCard(country);
-    positionHoverCard();
-  }
-
-  function positionHoverCard() {
-    var overlayNode = pageRoot.querySelector("[data-travel-overlay]");
-    var shellNode = pageRoot.querySelector(".travel-map-shell");
-    var cardNode = overlayNode ? overlayNode.querySelector(".travel-hover-card") : null;
-
-    if (!overlayNode || !shellNode || !cardNode) {
-      return;
-    }
-
-    if (window.innerWidth <= 960) {
-      cardNode.style.left = "";
-      cardNode.style.top = "";
-      return;
-    }
-
-    var anchor = state.hoverAnchor || state.activeAnchor;
-    var shellWidth = shellNode.clientWidth;
-    var shellHeight = shellNode.clientHeight;
-    var cardWidth = cardNode.offsetWidth;
-    var cardHeight = cardNode.offsetHeight;
-    var padding = 16;
-    var x = shellWidth - cardWidth - padding;
-    var y = padding;
-
-    if (anchor) {
-      x = anchor.x + 18;
-      y = anchor.y + 18;
-
-      if (x + cardWidth > shellWidth - padding) {
-        x = anchor.x - cardWidth - 18;
-      }
-
-      if (y + cardHeight > shellHeight - padding) {
-        y = shellHeight - cardHeight - padding;
-      }
-    }
-
-    x = clamp(x, padding, Math.max(padding, shellWidth - cardWidth - padding));
-    y = clamp(y, padding, Math.max(padding, shellHeight - cardHeight - padding));
-    cardNode.style.left = String(x) + "px";
-    cardNode.style.top = String(y) + "px";
+    bindHoverCardEvents(overlayNode);
   }
 
   function buildSelectField(label, key, options, selectedValue) {
@@ -628,9 +571,6 @@
       languages: ["全部"].concat(uniqueValues(countries, function (country) { return country.official_language; })),
       categories: ["全部"].concat(uniqueValues(countries, function (country) {
         return country.opportunities.map(function (item) { return item.opportunity_category; });
-      }, true)),
-      expoQuarters: ["全部"].concat(uniqueValues(countries, function (country) {
-        return country.expos.map(function (item) { return item.expo_quarter; });
       }, true))
     };
   }
@@ -671,16 +611,6 @@
         });
 
         if (!hasCategory) {
-          return false;
-        }
-      }
-
-      if (state.expoQuarter !== "全部") {
-        var hasQuarter = country.expos.some(function (item) {
-          return item.expo_quarter === state.expoQuarter;
-        });
-
-        if (!hasQuarter) {
           return false;
         }
       }
@@ -732,43 +662,7 @@
     return String(params.data.countryCode || "").trim().toUpperCase() || null;
   }
 
-  function resolveAnchorFromParams(params) {
-    if (!params || !params.event) {
-      return null;
-    }
-
-    return resolveAnchorFromEvent(params.event);
-  }
-
-  function resolveAnchorFromEvent(event) {
-    var nativeEvent = event && event.event ? event.event : event;
-    var x = nativeEvent && typeof nativeEvent.offsetX === "number" ? nativeEvent.offsetX : null;
-    var y = nativeEvent && typeof nativeEvent.offsetY === "number" ? nativeEvent.offsetY : null;
-
-    if ((x === null || y === null) && event) {
-      if (typeof event.offsetX === "number" && typeof event.offsetY === "number") {
-        x = event.offsetX;
-        y = event.offsetY;
-      } else if (typeof event.zrX === "number" && typeof event.zrY === "number") {
-        x = event.zrX;
-        y = event.zrY;
-      }
-    }
-
-    if (x === null || y === null) {
-      return null;
-    }
-
-    return { x: x, y: y };
-  }
-
   function getFocusCountry(visibleCountries) {
-    if (state.hoverCountryCode) {
-      return visibleCountries.find(function (country) {
-        return country.country_code === state.hoverCountryCode;
-      }) || null;
-    }
-
     if (state.activeCountryCode) {
       return visibleCountries.find(function (country) {
         return country.country_code === state.activeCountryCode;
@@ -787,7 +681,7 @@
     var relatedNews = resolveRelatedNews(country.news, primaryNews);
 
     return [
-      '<div class="travel-hover-card">',
+      '<div class="travel-hover-card" tabindex="0">',
       '  <div class="travel-hover-head">',
       '    <div>',
       '      <div class="travel-hover-country">' + escapeHtml(country.country_name) + '</div>',
@@ -924,12 +818,79 @@
     }) || null;
   }
 
+  function setFocusedCountry(code) {
+    if (!code) {
+      return;
+    }
+
+    cancelHoverCardHide();
+    state.hoverCountryCode = code;
+    state.activeCountryCode = code;
+    syncMapSelection();
+    syncHoverCard();
+  }
+
+  function clearFocusedCountry() {
+    if (!state.activeCountryCode && !state.hoverCountryCode) {
+      cancelHoverCardHide();
+      return;
+    }
+
+    cancelHoverCardHide();
+    state.activeCountryCode = null;
+    state.hoverCountryCode = null;
+    syncMapSelection();
+    syncHoverCard();
+  }
+
+  function scheduleHoverCardHide() {
+    if (isHoverCardHovered) {
+      return;
+    }
+
+    cancelHoverCardHide();
+    hoverCardHideTimer = window.setTimeout(function () {
+      hoverCardHideTimer = 0;
+
+      if (state.hoverCountryCode || isHoverCardHovered) {
+        return;
+      }
+
+      clearFocusedCountry();
+    }, HOVER_CARD_HIDE_DELAY);
+  }
+
+  function cancelHoverCardHide() {
+    if (!hoverCardHideTimer) {
+      return;
+    }
+
+    window.clearTimeout(hoverCardHideTimer);
+    hoverCardHideTimer = 0;
+  }
+
+  function bindHoverCardEvents(overlayNode) {
+    var cardNode = overlayNode.querySelector(".travel-hover-card");
+
+    if (!cardNode) {
+      return;
+    }
+
+    cardNode.addEventListener("mouseenter", function () {
+      isHoverCardHovered = true;
+      cancelHoverCardHide();
+    });
+
+    cardNode.addEventListener("mouseleave", function () {
+      isHoverCardHovered = false;
+      scheduleHoverCardHide();
+    });
+  }
+
   function handleWindowResize() {
     if (mapChart) {
       mapChart.resize();
     }
-
-    window.requestAnimationFrame(positionHoverCard);
   }
 
   function destroyMapChart() {
@@ -1043,10 +1004,6 @@
     }
 
     return value.toFixed(2).replace(/0+$/, "").replace(/\.$/, "");
-  }
-
-  function clamp(value, min, max) {
-    return Math.min(Math.max(value, min), max);
   }
 
   function escapeHtml(value) {

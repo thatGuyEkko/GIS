@@ -136,20 +136,28 @@
     }
   }
 
-  function setFrameHeight() {
-    try {
-      var doc = frame.contentWindow && frame.contentWindow.document;
-      if (!doc) {
+  function setFrameHeight(nextHeight) {
+    var height = Number(nextHeight);
+
+    if (!Number.isFinite(height) || height <= 0) {
+      try {
+        var doc = frame.contentWindow && frame.contentWindow.document;
+        if (!doc) {
+          return;
+        }
+
+        var main = doc.querySelector('main');
+        if (main) {
+          height = Math.ceil(main.getBoundingClientRect().height);
+        } else if (doc.body) {
+          height = Math.ceil(doc.body.getBoundingClientRect().height);
+        }
+      } catch (error) {
         return;
       }
-
-      var bodyHeight = doc.body ? doc.body.scrollHeight : 0;
-      var docHeight = doc.documentElement ? doc.documentElement.scrollHeight : 0;
-      var height = Math.max(bodyHeight, docHeight, 520);
-      frame.style.height = height + 'px';
-    } catch (error) {
-      return;
     }
+
+    frame.style.height = Math.max(Math.ceil(height), 320) + 'px';
   }
 
   function renderRoute(route, detailCode, options) {
@@ -251,7 +259,7 @@
     }
 
     if (event.data.type === 'ooms:resize') {
-      setFrameHeight();
+      setFrameHeight(event.data.height);
     }
   });
 
