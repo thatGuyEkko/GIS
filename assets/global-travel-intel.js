@@ -658,6 +658,7 @@
       var code = extractCountryCode(params);
 
       if (!code) {
+        clearActiveCountryState();
         return;
       }
 
@@ -674,6 +675,14 @@
       if (!state.lockedCountryCode) {
         syncHoverCard();
       }
+    });
+
+    mapChart.getZr().on("click", function (event) {
+      if (event && event.target) {
+        return;
+      }
+
+      clearActiveCountryState();
     });
 
     if (!hasBoundResize) {
@@ -2080,6 +2089,17 @@
       state.hoverCountryCode = code;
     }
 
+    syncMapSelection();
+    syncHoverCard();
+  }
+
+  function clearActiveCountryState() {
+    if (!state.lockedCountryCode && !state.hoverCountryCode) {
+      return;
+    }
+
+    state.lockedCountryCode = null;
+    state.hoverCountryCode = null;
     syncMapSelection();
     syncHoverCard();
   }
