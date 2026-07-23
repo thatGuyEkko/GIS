@@ -7,7 +7,7 @@
       title: '商机看板'
     },
     travel: {
-      page: 'global-travel-intel.html?v=20260723d',
+      page: 'global-travel-intel.html?v=20260723h',
       title: '全球化旅业信息看板'
     },
     leads: {

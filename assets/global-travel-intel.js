@@ -6,69 +6,80 @@
   var currentView = null;
   var hasBoundResize = false;
   var lastSelectedCode = null;
+  var worldMapRegionsCache = null;
+  var worldMapFeaturesByCodeCache = null;
+  var regionCodeCandidatesByNameCache = null;
+  var worldMapName = "world-iso-a2";
   var regionDisplayNames = typeof Intl !== "undefined" && typeof Intl.DisplayNames === "function"
     ? new Intl.DisplayNames(["en"], { type: "region" })
     : null;
-  var mapNameOverrides = {
-    AE: "United Arab Emirates",
-    BA: "Bosnia and Herz.",
-    BN: "Brunei",
-    CF: "Central African Rep.",
-    CG: "Congo",
-    CD: "Dem. Rep. Congo",
-    CI: "Cote d'Ivoire",
-    CZ: "Czech Rep.",
-    DO: "Dominican Rep.",
-    EH: "W. Sahara",
-    GB: "United Kingdom",
-    IR: "Iran",
-    KP: "North Korea",
-    KR: "South Korea",
-    LA: "Laos",
-    MK: "Macedonia",
-    PS: "Palestine",
-    RU: "Russia",
-    SB: "Solomon Is.",
-    SS: "S. Sudan",
-    SY: "Syria",
-    TL: "Timor-Leste",
-    TZ: "Tanzania",
-    US: "United States",
-    VE: "Venezuela",
-    VN: "Vietnam"
+  var legacyRegionCodes = {
+    AN: true,
+    CS: true,
+    DD: true,
+    DY: true,
+    FX: true,
+    HV: true,
+    NH: true,
+    RH: true,
+    SU: true,
+    TP: true,
+    UK: true,
+    VD: true,
+    YD: true,
+    YU: true
   };
-  var countryColorOverrides = {
-    AE: "#9b5de5",
-    AU: "#577590",
-    BR: "#f15bb5",
-    CN: "#ef476f",
-    DE: "#06d6a0",
-    ES: "#ffd166",
-    FR: "#ff7f51",
-    GB: "#3a86ff",
-    ID: "#8338ec",
-    JP: "#fb8500",
-    KR: "#4cc9f0",
-    MY: "#90be6d",
-    SA: "#e76f51",
-    SG: "#2a9d8f",
-    TH: "#ff006e",
-    TR: "#00b4d8",
-    US: "#118ab2",
-    VN: "#8ac926"
+  var mapIsoCodeOverrides = {
+    aland: "AX",
+    "antigua and barb": "AG",
+    "bosnia and herz": "BA",
+    "br indian ocean ter": "IO",
+    "cayman is": "KY",
+    "central african rep": "CF",
+    congo: "CG",
+    "czech rep": "CZ",
+    "dem rep congo": "CD",
+    "dem rep korea": "KP",
+    "dominican rep": "DO",
+    "eq guinea": "GQ",
+    "faeroe is": "FO",
+    "falkland is": "FK",
+    "fr polynesia": "PF",
+    "fr s antarctic lands": "TF",
+    "heard i and mcdonald is": "HM",
+    korea: "KR",
+    "lao pdr": "LA",
+    macedonia: "MK",
+    myanmar: "MM",
+    "n cyprus": null,
+    "n mariana is": "MP",
+    palestine: "PS",
+    "s geo and s sandw is": "GS",
+    "s sudan": "SS",
+    "saint helena": "SH",
+    "saint lucia": "LC",
+    "siachen glacier": null,
+    "solomon is": "SB",
+    "st vin and gren": "VC",
+    swaziland: "SZ",
+    turkey: "TR",
+    "turks and caicos is": "TC",
+    "u s virgin is": "VI",
+    "w sahara": "EH"
   };
-  var fallbackCountryPalette = [
+  var travelMapPalette = [
     "#ef476f",
-    "#3a86ff",
-    "#06d6a0",
-    "#ff006e",
-    "#8338ec",
-    "#fb8500",
     "#118ab2",
     "#ffd166",
+    "#06d6a0",
+    "#8338ec",
+    "#fb8500",
+    "#3a86ff",
+    "#ff006e",
     "#2a9d8f",
-    "#f15bb5",
     "#8ac926",
+    "#f15bb5",
+    "#ff7f51",
     "#4cc9f0",
     "#e76f51",
     "#577590"
@@ -331,6 +342,8 @@
       return;
     }
 
+    ensureCountryColorAssignments();
+
     var filters = deriveFilterOptions(store.countries);
     var filteredCountries = getFilteredCountries(store.countries);
     var visibleCountries = filteredCountries.filter(canRenderOnMap);
@@ -397,6 +410,11 @@
 
     if (typeof window.echarts.getMap !== "function" || !window.echarts.getMap("world")) {
       renderState("ECharts 世界地图数据未成功加载，请检查 assets/vendor/echarts-world.js。", true);
+      return false;
+    }
+
+    if (!ensureIsoWorldMap()) {
+      renderState("ECharts 世界地图未能生成 ISO_A2 属性，请检查 assets/vendor/echarts-world.js。", true);
       return false;
     }
 
@@ -509,7 +527,7 @@
       series: [
         {
           type: "map",
-          map: "world",
+          map: worldMapName,
           roam: true,
           selectedMode: "single",
           left: 8,
@@ -521,7 +539,7 @@
             max: 6
           },
           zoom: 1.08,
-          nameProperty: "name",
+          nameProperty: "ISO_A2",
           label: {
             show: false
           },
@@ -568,7 +586,7 @@
       var baseColor = getCountryMapColor(country, index);
 
       return {
-        name: resolveMapCountryName(country),
+        name: country.country_code,
         value: getCountryMapValue(country),
         countryCode: country.country_code,
         selected: state.lockedCountryCode === country.country_code,
@@ -595,14 +613,445 @@
     });
   }
 
+  function ensureCountryColorAssignments() {
+    if (!store) {
+      return;
+    }
+
+    if (store.countryColorByCode) {
+      return;
+    }
+
+    store.countryColorByCode = buildCountryColorAssignments(store.countries.filter(canRenderOnMap));
+  }
+
+  function buildCountryColorAssignments(countries) {
+    var assignments = {};
+    var adjacencyByCode = buildCountryAdjacencyGraph(countries);
+    var assignedIndexes = {};
+    var paletteUsage = {};
+    var countriesByCode = indexCountriesByCode(countries);
+    var sortedCountries = countries.slice().sort(function (left, right) {
+      var leftDegree = countObjectKeys(adjacencyByCode[left.country_code]);
+      var rightDegree = countObjectKeys(adjacencyByCode[right.country_code]);
+
+      if (leftDegree !== rightDegree) {
+        return rightDegree - leftDegree;
+      }
+
+      var valueDelta = getCountryMapValue(right) - getCountryMapValue(left);
+      if (valueDelta !== 0) {
+        return valueDelta;
+      }
+
+      if (left.display_order !== right.display_order) {
+        return left.display_order - right.display_order;
+      }
+
+      return hashCountryCode(left.country_code) - hashCountryCode(right.country_code);
+    });
+
+    sortedCountries.forEach(function (country) {
+      var code = country.country_code;
+      var neighborIndexes = collectAssignedNeighborIndexes(code, adjacencyByCode, assignedIndexes);
+      var paletteIndex = pickPaletteIndex(code, neighborIndexes, paletteUsage);
+
+      assignedIndexes[code] = paletteIndex;
+      paletteUsage[paletteIndex] = (paletteUsage[paletteIndex] || 0) + 1;
+    });
+
+    Object.keys(assignedIndexes).forEach(function (code) {
+      assignments[code] = travelMapPalette[assignedIndexes[code]];
+    });
+
+    Object.keys(countriesByCode).forEach(function (code) {
+      if (!assignments[code]) {
+        assignments[code] = travelMapPalette[hashCountryCode(code) % travelMapPalette.length];
+      }
+    });
+
+    return assignments;
+  }
+
+  function buildCountryAdjacencyGraph(countries) {
+    var adjacencyByCode = {};
+    var regions = getWorldMapRegions();
+    var regionsByCode = {};
+    var segmentOwners = {};
+    var pointOwners = {};
+    var sharedPointCounts = {};
+
+    countries.forEach(function (country) {
+      adjacencyByCode[country.country_code] = {};
+    });
+
+    regions.forEach(function (region) {
+      var code = String(region && region.isoA2 || "").trim().toUpperCase();
+      if (code) {
+        regionsByCode[code] = region;
+      }
+    });
+
+    countries.forEach(function (country) {
+      var code = country.country_code;
+      var region = code ? regionsByCode[code] : null;
+
+      if (!code || !region) {
+        return;
+      }
+
+      collectRegionRings(region).forEach(function (ring) {
+        var normalizedRing = ring.slice();
+
+        if (normalizedRing.length >= 2 && buildPointKey(normalizedRing[0]) === buildPointKey(normalizedRing[normalizedRing.length - 1])) {
+          normalizedRing.pop();
+        }
+
+        if (normalizedRing.length < 2) {
+          return;
+        }
+
+        normalizedRing.forEach(function (point) {
+          addOwner(pointOwners, buildPointKey(point), code);
+        });
+
+        for (var index = 0; index < normalizedRing.length; index += 1) {
+          var currentPoint = normalizedRing[index];
+          var nextPoint = normalizedRing[(index + 1) % normalizedRing.length];
+          addOwner(segmentOwners, buildSegmentKey(currentPoint, nextPoint), code);
+        }
+      });
+    });
+
+    Object.keys(segmentOwners).forEach(function (segmentKey) {
+      var owners = Object.keys(segmentOwners[segmentKey] || {});
+
+      for (var leftIndex = 0; leftIndex < owners.length; leftIndex += 1) {
+        for (var rightIndex = leftIndex + 1; rightIndex < owners.length; rightIndex += 1) {
+          connectCountries(adjacencyByCode, owners[leftIndex], owners[rightIndex]);
+        }
+      }
+    });
+
+    Object.keys(pointOwners).forEach(function (pointKey) {
+      var owners = Object.keys(pointOwners[pointKey] || {});
+
+      for (var leftIndex = 0; leftIndex < owners.length; leftIndex += 1) {
+        for (var rightIndex = leftIndex + 1; rightIndex < owners.length; rightIndex += 1) {
+          var pairKey = owners[leftIndex] < owners[rightIndex]
+            ? owners[leftIndex] + "|" + owners[rightIndex]
+            : owners[rightIndex] + "|" + owners[leftIndex];
+          sharedPointCounts[pairKey] = (sharedPointCounts[pairKey] || 0) + 1;
+        }
+      }
+    });
+
+    Object.keys(sharedPointCounts).forEach(function (pairKey) {
+      if (sharedPointCounts[pairKey] < 2) {
+        return;
+      }
+
+      var parts = pairKey.split("|");
+      connectCountries(adjacencyByCode, parts[0], parts[1]);
+    });
+
+    return adjacencyByCode;
+  }
+
+  function getWorldMapRegions() {
+    if (worldMapRegionsCache) {
+      return worldMapRegionsCache;
+    }
+
+    if (!ensureIsoWorldMap()) {
+      worldMapRegionsCache = [];
+      return worldMapRegionsCache;
+    }
+
+    if (!window.echarts || typeof window.echarts.getMap !== "function") {
+      worldMapRegionsCache = [];
+      return worldMapRegionsCache;
+    }
+
+    var mapRecord = window.echarts.getMap(worldMapName);
+    var rawGeoJson = mapRecord && (mapRecord.geoJSON || mapRecord.geoJson);
+    var parser = window.echarts.parseGeoJSON || window.echarts.parseGeoJson;
+
+    if (!rawGeoJson || typeof parser !== "function") {
+      worldMapRegionsCache = [];
+      return worldMapRegionsCache;
+    }
+
+    try {
+      worldMapRegionsCache = parser(rawGeoJson) || [];
+      worldMapRegionsCache.forEach(function (region, index) {
+        var feature = rawGeoJson.features && rawGeoJson.features[index];
+        var code = String(feature && feature.properties && feature.properties.ISO_A2 || "").trim().toUpperCase();
+        region.isoA2 = code || null;
+      });
+    } catch (error) {
+      worldMapRegionsCache = [];
+    }
+
+    return worldMapRegionsCache;
+  }
+
+  function collectRegionRings(region) {
+    var rings = [];
+
+    if (!region) {
+      return rings;
+    }
+
+    if (Array.isArray(region.geometries)) {
+      region.geometries.forEach(function (geometry) {
+        if (!geometry) {
+          return;
+        }
+
+        if (Array.isArray(geometry.exterior)) {
+          rings.push(geometry.exterior);
+        }
+
+        if (Array.isArray(geometry.interiors)) {
+          geometry.interiors.forEach(function (interior) {
+            if (Array.isArray(interior)) {
+              rings.push(interior);
+            }
+          });
+        }
+
+        if (Array.isArray(geometry.coordinates)) {
+          collectCoordinateRings(geometry.coordinates, rings);
+        }
+      });
+    } else if (Array.isArray(region.coordinates)) {
+      collectCoordinateRings(region.coordinates, rings);
+    }
+
+    return rings.filter(function (ring) {
+      return Array.isArray(ring) && ring.length >= 2;
+    });
+  }
+
+  function collectCoordinateRings(coordinates, target) {
+    if (!Array.isArray(coordinates) || !coordinates.length) {
+      return;
+    }
+
+    if (isCoordinateRing(coordinates)) {
+      target.push(coordinates);
+      return;
+    }
+
+    coordinates.forEach(function (item) {
+      collectCoordinateRings(item, target);
+    });
+  }
+
+  function isCoordinateRing(value) {
+    return Array.isArray(value)
+      && value.length >= 2
+      && Array.isArray(value[0])
+      && value[0].length >= 2
+      && typeof value[0][0] === "number"
+      && typeof value[0][1] === "number";
+  }
+
+  function addOwner(target, key, owner) {
+    if (!key || !owner) {
+      return;
+    }
+
+    if (!target[key]) {
+      target[key] = {};
+    }
+
+    target[key][owner] = true;
+  }
+
+  function connectCountries(adjacencyByCode, leftCode, rightCode) {
+    if (!leftCode || !rightCode || leftCode === rightCode) {
+      return;
+    }
+
+    if (!adjacencyByCode[leftCode]) {
+      adjacencyByCode[leftCode] = {};
+    }
+
+    if (!adjacencyByCode[rightCode]) {
+      adjacencyByCode[rightCode] = {};
+    }
+
+    adjacencyByCode[leftCode][rightCode] = true;
+    adjacencyByCode[rightCode][leftCode] = true;
+  }
+
+  function buildPointKey(point) {
+    if (!Array.isArray(point) || point.length < 2) {
+      return "";
+    }
+
+    return quantizeCoordinate(point[0]) + ":" + quantizeCoordinate(point[1]);
+  }
+
+  function buildSegmentKey(leftPoint, rightPoint) {
+    var leftKey = buildPointKey(leftPoint);
+    var rightKey = buildPointKey(rightPoint);
+
+    if (!leftKey || !rightKey) {
+      return "";
+    }
+
+    return leftKey < rightKey
+      ? leftKey + "|" + rightKey
+      : rightKey + "|" + leftKey;
+  }
+
+  function quantizeCoordinate(value) {
+    var numericValue = Number(value);
+
+    if (!Number.isFinite(numericValue)) {
+      return 0;
+    }
+
+    return Math.round(numericValue * 1000);
+  }
+
+  function countObjectKeys(object) {
+    return object ? Object.keys(object).length : 0;
+  }
+
+  function collectAssignedNeighborIndexes(code, adjacencyByCode, assignedIndexes) {
+    var result = [];
+    var seenIndexes = {};
+    var neighbors = adjacencyByCode[code] || {};
+
+    Object.keys(neighbors).forEach(function (neighborCode) {
+      if (assignedIndexes[neighborCode] === undefined) {
+        return;
+      }
+
+      var paletteIndex = assignedIndexes[neighborCode];
+      if (seenIndexes[paletteIndex]) {
+        return;
+      }
+
+      seenIndexes[paletteIndex] = true;
+      result.push(paletteIndex);
+    });
+
+    return result;
+  }
+
+  function pickPaletteIndex(code, neighborIndexes, paletteUsage) {
+    var bestCandidate = null;
+
+    for (var paletteIndex = 0; paletteIndex < travelMapPalette.length; paletteIndex += 1) {
+      var candidate = scorePaletteIndex(code, paletteIndex, neighborIndexes, paletteUsage);
+
+      if (!bestCandidate || isBetterPaletteCandidate(candidate, bestCandidate)) {
+        bestCandidate = candidate;
+      }
+    }
+
+    return bestCandidate ? bestCandidate.index : getPreferredPaletteIndex(code);
+  }
+
+  function scorePaletteIndex(code, paletteIndex, neighborIndexes, paletteUsage) {
+    var conflicts = 0;
+    var minDistance = Number.POSITIVE_INFINITY;
+    var totalDistance = 0;
+
+    neighborIndexes.forEach(function (neighborIndex) {
+      if (neighborIndex === paletteIndex) {
+        conflicts += 1;
+      }
+
+      var distance = getPaletteColorDistance(paletteIndex, neighborIndex);
+      minDistance = Math.min(minDistance, distance);
+      totalDistance += distance;
+    });
+
+    if (!neighborIndexes.length) {
+      minDistance = Number.POSITIVE_INFINITY;
+    }
+
+    return {
+      index: paletteIndex,
+      conflicts: conflicts,
+      minDistance: minDistance,
+      totalDistance: totalDistance,
+      usage: paletteUsage[paletteIndex] || 0,
+      preferredOffset: getPaletteIndexOffset(paletteIndex, getPreferredPaletteIndex(code))
+    };
+  }
+
+  function isBetterPaletteCandidate(candidate, currentBest) {
+    if (candidate.conflicts !== currentBest.conflicts) {
+      return candidate.conflicts < currentBest.conflicts;
+    }
+
+    if (candidate.minDistance !== currentBest.minDistance) {
+      return candidate.minDistance > currentBest.minDistance;
+    }
+
+    if (candidate.totalDistance !== currentBest.totalDistance) {
+      return candidate.totalDistance > currentBest.totalDistance;
+    }
+
+    if (candidate.usage !== currentBest.usage) {
+      return candidate.usage < currentBest.usage;
+    }
+
+    if (candidate.preferredOffset !== currentBest.preferredOffset) {
+      return candidate.preferredOffset < currentBest.preferredOffset;
+    }
+
+    return candidate.index < currentBest.index;
+  }
+
+  function getPaletteColorDistance(leftIndex, rightIndex) {
+    var leftColor = parseHexColor(travelMapPalette[leftIndex]);
+    var rightColor = parseHexColor(travelMapPalette[rightIndex]);
+    var redDelta = leftColor[0] - rightColor[0];
+    var greenDelta = leftColor[1] - rightColor[1];
+    var blueDelta = leftColor[2] - rightColor[2];
+
+    return Math.sqrt(redDelta * redDelta + greenDelta * greenDelta + blueDelta * blueDelta);
+  }
+
+  function parseHexColor(hex) {
+    var normalized = String(hex || "").replace("#", "");
+
+    if (normalized.length !== 6) {
+      return [0, 0, 0];
+    }
+
+    return [
+      parseInt(normalized.slice(0, 2), 16),
+      parseInt(normalized.slice(2, 4), 16),
+      parseInt(normalized.slice(4, 6), 16)
+    ];
+  }
+
+  function getPreferredPaletteIndex(code) {
+    return hashCountryCode(code) % travelMapPalette.length;
+  }
+
+  function getPaletteIndexOffset(leftIndex, rightIndex) {
+    var directDistance = Math.abs(leftIndex - rightIndex);
+    return Math.min(directDistance, travelMapPalette.length - directDistance);
+  }
+
   function getCountryMapColor(country, index) {
     var code = String(country.country_code || "").toUpperCase();
 
-    if (countryColorOverrides[code]) {
-      return countryColorOverrides[code];
+    if (store && store.countryColorByCode && store.countryColorByCode[code]) {
+      return store.countryColorByCode[code];
     }
 
-    return fallbackCountryPalette[hashCountryCode(code || String(index)) % fallbackCountryPalette.length];
+    return travelMapPalette[hashCountryCode(code || String(index)) % travelMapPalette.length];
   }
 
   function hashCountryCode(code) {
@@ -735,25 +1184,191 @@
   }
 
   function canRenderOnMap(country) {
-    return country.map_enabled_flag && !!resolveMapCountryName(country);
+    var code = String(country && country.country_code || "").trim().toUpperCase();
+    return !!country.map_enabled_flag && !!code && !!getWorldMapFeatureByCode(code);
   }
 
-  function resolveMapCountryName(country) {
-    var code = String(country && country.country_code || "").trim().toUpperCase();
+  function ensureIsoWorldMap() {
+    if (!window.echarts || typeof window.echarts.getMap !== "function" || typeof window.echarts.registerMap !== "function") {
+      return false;
+    }
 
-    if (!code) {
+    if (window.echarts.getMap(worldMapName)) {
+      return true;
+    }
+
+    var mapRecord = window.echarts.getMap("world");
+    var rawGeoJson = mapRecord && (mapRecord.geoJSON || mapRecord.geoJson);
+
+    if (!rawGeoJson || !Array.isArray(rawGeoJson.features)) {
+      return false;
+    }
+
+    var clonedGeoJson = {};
+    Object.keys(rawGeoJson).forEach(function (key) {
+      if (key !== "features") {
+        clonedGeoJson[key] = rawGeoJson[key];
+      }
+    });
+
+    clonedGeoJson.features = rawGeoJson.features.map(function (feature) {
+      var clonedFeature = {};
+      var properties = {};
+
+      Object.keys(feature || {}).forEach(function (key) {
+        if (key !== "properties") {
+          clonedFeature[key] = feature[key];
+        }
+      });
+
+      Object.keys(feature && feature.properties || {}).forEach(function (key) {
+        properties[key] = feature.properties[key];
+      });
+
+      properties.ISO_A2 = resolveRegionCodeByMapName(properties.name);
+      clonedFeature.properties = properties;
+
+      return clonedFeature;
+    });
+
+    window.echarts.registerMap(worldMapName, clonedGeoJson);
+    worldMapRegionsCache = null;
+    worldMapFeaturesByCodeCache = null;
+
+    return !!window.echarts.getMap(worldMapName);
+  }
+
+  function getWorldMapFeatureByCode(code) {
+    var normalizedCode = String(code || "").trim().toUpperCase();
+
+    if (!normalizedCode) {
       return null;
     }
 
-    if (mapNameOverrides[code]) {
-      return mapNameOverrides[code];
+    return getWorldMapFeaturesByCode()[normalizedCode] || null;
+  }
+
+  function getWorldMapFeaturesByCode() {
+    if (worldMapFeaturesByCodeCache) {
+      return worldMapFeaturesByCodeCache;
     }
+
+    if (!ensureIsoWorldMap()) {
+      worldMapFeaturesByCodeCache = {};
+      return worldMapFeaturesByCodeCache;
+    }
+
+    var mapRecord = window.echarts.getMap(worldMapName);
+    var rawGeoJson = mapRecord && (mapRecord.geoJSON || mapRecord.geoJson);
+    var featuresByCode = {};
+
+    if (!rawGeoJson || !Array.isArray(rawGeoJson.features)) {
+      worldMapFeaturesByCodeCache = featuresByCode;
+      return worldMapFeaturesByCodeCache;
+    }
+
+    rawGeoJson.features.forEach(function (feature) {
+      var code = String(feature && feature.properties && feature.properties.ISO_A2 || "").trim().toUpperCase();
+
+      if (code && !featuresByCode[code]) {
+        featuresByCode[code] = feature;
+      }
+    });
+
+    worldMapFeaturesByCodeCache = featuresByCode;
+    return worldMapFeaturesByCodeCache;
+  }
+
+  function resolveRegionCodeByMapName(name) {
+    var normalizedName = normalizeRegionName(name);
+
+    if (!normalizedName) {
+      return null;
+    }
+
+    if (Object.prototype.hasOwnProperty.call(mapIsoCodeOverrides, normalizedName)) {
+      return mapIsoCodeOverrides[normalizedName];
+    }
+
+    var candidates = buildRegionCodeCandidatesByName()[normalizedName] || [];
+    return pickPreferredRegionCode(candidates);
+  }
+
+  function buildRegionCodeCandidatesByName() {
+    if (regionCodeCandidatesByNameCache) {
+      return regionCodeCandidatesByNameCache;
+    }
+
+    var candidatesByName = {};
 
     if (!regionDisplayNames) {
+      regionCodeCandidatesByNameCache = candidatesByName;
+      return regionCodeCandidatesByNameCache;
+    }
+
+    for (var firstCode = 65; firstCode <= 90; firstCode += 1) {
+      for (var secondCode = 65; secondCode <= 90; secondCode += 1) {
+        var regionCode = String.fromCharCode(firstCode, secondCode);
+        var regionName = null;
+
+        try {
+          regionName = regionDisplayNames.of(regionCode);
+        } catch (error) {
+          regionName = null;
+        }
+
+        if (!regionName || regionName === regionCode) {
+          continue;
+        }
+
+        var normalizedName = normalizeRegionName(regionName);
+
+        if (!normalizedName) {
+          continue;
+        }
+
+        if (!candidatesByName[normalizedName]) {
+          candidatesByName[normalizedName] = [];
+        }
+
+        candidatesByName[normalizedName].push(regionCode);
+      }
+    }
+
+    regionCodeCandidatesByNameCache = candidatesByName;
+    return regionCodeCandidatesByNameCache;
+  }
+
+  function pickPreferredRegionCode(candidates) {
+    if (!Array.isArray(candidates) || !candidates.length) {
       return null;
     }
 
-    return regionDisplayNames.of(code) || null;
+    var filteredCodes = candidates.filter(function (code) {
+      return !legacyRegionCodes[code];
+    });
+
+    if (filteredCodes.length === 1) {
+      return filteredCodes[0];
+    }
+
+    if (filteredCodes.length > 1) {
+      return null;
+    }
+
+    return candidates.length === 1 ? candidates[0] : null;
+  }
+
+  function normalizeRegionName(value) {
+    return String(value || "")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/&/g, " and ")
+      .replace(/[^a-zA-Z0-9]+/g, " ")
+      .replace(/\bthe\b/g, " ")
+      .replace(/\s+/g, " ")
+      .trim()
+      .toLowerCase();
   }
 
   function getCountryMapValue(country) {
