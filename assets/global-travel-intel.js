@@ -69,7 +69,6 @@
 
   var store = null;
   var state = {
-    region: "全部",
     language: "全部",
     category: "全部",
     lockedCountryCode: null,
@@ -335,7 +334,6 @@
       '    <button type="button" class="travel-reset-btn" data-travel-action="reset">重置筛选</button>',
       '  </div>',
       '  <div class="travel-filter-grid">',
-      buildSelectField("区域", "region", filters.regions, state.region),
       buildSelectField("官方语言", "language", filters.languages, state.language),
       buildSelectField("商机 / 线索类型", "category", filters.categories, state.category),
       '  </div>',
@@ -390,7 +388,6 @@
 
     if (resetButton) {
       resetButton.addEventListener("click", function () {
-        state.region = "全部";
         state.language = "全部";
         state.category = "全部";
         state.lockedCountryCode = null;
@@ -597,7 +594,6 @@
 
   function deriveFilterOptions(countries) {
     return {
-      regions: ["全部"].concat(uniqueValues(countries, function (country) { return country.region_name; })),
       languages: ["全部"].concat(uniqueValues(countries, function (country) { return country.official_language; })),
       categories: ["全部"].concat(uniqueValues(countries, function (country) {
         return country.leads.map(function (item) { return item.type; })
@@ -628,10 +624,6 @@
 
   function getFilteredCountries(countries) {
     return countries.filter(function (country) {
-      if (state.region !== "全部" && country.region_name !== state.region) {
-        return false;
-      }
-
       if (state.language !== "全部" && country.official_language !== state.language) {
         return false;
       }
