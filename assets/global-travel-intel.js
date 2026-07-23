@@ -37,6 +37,42 @@
     VE: "Venezuela",
     VN: "Vietnam"
   };
+  var countryColorOverrides = {
+    AE: "#9b5de5",
+    AU: "#577590",
+    BR: "#f15bb5",
+    CN: "#ef476f",
+    DE: "#06d6a0",
+    ES: "#ffd166",
+    FR: "#ff7f51",
+    GB: "#3a86ff",
+    ID: "#8338ec",
+    JP: "#fb8500",
+    KR: "#4cc9f0",
+    MY: "#90be6d",
+    SA: "#e76f51",
+    SG: "#2a9d8f",
+    TH: "#ff006e",
+    TR: "#00b4d8",
+    US: "#118ab2",
+    VN: "#8ac926"
+  };
+  var fallbackCountryPalette = [
+    "#ef476f",
+    "#3a86ff",
+    "#06d6a0",
+    "#ff006e",
+    "#8338ec",
+    "#fb8500",
+    "#118ab2",
+    "#ffd166",
+    "#2a9d8f",
+    "#f15bb5",
+    "#8ac926",
+    "#4cc9f0",
+    "#e76f51",
+    "#577590"
+  ];
 
   if (!pageRoot) {
     return;
@@ -328,19 +364,14 @@
       '    <h1 class="page-title">全球化旅业信息看板</h1>',
       '  </div>',
       '</div>',
-      '<section class="travel-filter-card section">',
-      '  <div class="section-head">',
-      '    <div class="section-title">筛选</div>',
-      '    <button type="button" class="travel-reset-btn" data-travel-action="reset">重置筛选</button>',
-      '  </div>',
-      '  <div class="travel-filter-grid">',
+      '<section class="travel-map-card section">',
+      '  <div class="section-head travel-map-toolbar">',
+      '    <div class="section-title">主地图看板</div>',
+      '    <div class="travel-map-toolbar-actions">',
       buildSelectField("官方语言", "language", filters.languages, state.language),
       buildSelectField("商机 / 线索类型", "category", filters.categories, state.category),
-      '  </div>',
-      '</section>',
-      '<section class="travel-map-card section">',
-      '  <div class="section-head">',
-      '    <div class="section-title">主地图看板</div>',
+      '      <button type="button" class="travel-reset-btn" data-travel-action="reset">重置</button>',
+      '    </div>',
       '  </div>',
       '  <div class="travel-map-shell">',
       '    <div class="travel-map-stage">',
@@ -470,22 +501,10 @@
   }
 
   function buildMapOption(visibleCountries) {
-    var values = visibleCountries.map(getCountryMapValue);
-    var maxValue = values.length ? Math.max.apply(null, values) : 1;
-
     return {
       animation: false,
       tooltip: {
         show: false
-      },
-      visualMap: {
-        min: 0,
-        max: maxValue,
-        show: false,
-        calculable: false,
-        inRange: {
-          color: ["#dfe7dd", "#97b88f", "#5e8b63"]
-        }
       },
       series: [
         {
@@ -507,18 +526,24 @@
             show: false
           },
           itemStyle: {
-            areaColor: "#d8d5cc",
+            areaColor: "#ddd7cc",
             borderColor: "#ffffff",
-            borderWidth: 0.8
+            borderWidth: 1
           },
           emphasis: {
             label: {
               show: false
             },
             itemStyle: {
-              areaColor: "#d88b4f",
               borderColor: "#ffffff",
-              borderWidth: 1.4
+              borderWidth: 1.8,
+              shadowBlur: 18,
+              shadowColor: "rgba(41, 51, 67, 0.2)"
+            }
+          },
+          blur: {
+            itemStyle: {
+              opacity: 0.85
             }
           },
           select: {
@@ -526,9 +551,10 @@
               show: false
             },
             itemStyle: {
-              areaColor: "#c96a2d",
               borderColor: "#ffffff",
-              borderWidth: 1.6
+              borderWidth: 2.1,
+              shadowBlur: 22,
+              shadowColor: "rgba(41, 51, 67, 0.26)"
             }
           },
           data: buildMapSeriesData(visibleCountries)
@@ -538,14 +564,78 @@
   }
 
   function buildMapSeriesData(visibleCountries) {
-    return visibleCountries.map(function (country) {
+    return visibleCountries.map(function (country, index) {
+      var baseColor = getCountryMapColor(country, index);
+
       return {
         name: resolveMapCountryName(country),
         value: getCountryMapValue(country),
         countryCode: country.country_code,
-        selected: state.lockedCountryCode === country.country_code
+        selected: state.lockedCountryCode === country.country_code,
+        itemStyle: {
+          areaColor: baseColor,
+          borderColor: "#ffffff",
+          borderWidth: 1.15
+        },
+        emphasis: {
+          itemStyle: {
+            areaColor: shiftColor(baseColor, 0.1),
+            borderColor: "#ffffff",
+            borderWidth: 1.9
+          }
+        },
+        select: {
+          itemStyle: {
+            areaColor: shiftColor(baseColor, -0.1),
+            borderColor: "#ffffff",
+            borderWidth: 2.1
+          }
+        }
       };
     });
+  }
+
+  function getCountryMapColor(country, index) {
+    var code = String(country.country_code || "").toUpperCase();
+
+    if (countryColorOverrides[code]) {
+      return countryColorOverrides[code];
+    }
+
+    return fallbackCountryPalette[hashCountryCode(code || String(index)) % fallbackCountryPalette.length];
+  }
+
+  function hashCountryCode(code) {
+    var value = 0;
+    var normalized = String(code || "");
+
+    for (var index = 0; index < normalized.length; index += 1) {
+      value = (value * 33 + normalized.charCodeAt(index)) >>> 0;
+    }
+
+    return value;
+  }
+
+  function shiftColor(hex, amount) {
+    var normalized = String(hex || "").replace("#", "");
+
+    if (normalized.length !== 6) {
+      return hex;
+    }
+
+    var red = parseInt(normalized.slice(0, 2), 16);
+    var green = parseInt(normalized.slice(2, 4), 16);
+    var blue = parseInt(normalized.slice(4, 6), 16);
+    var target = amount >= 0 ? 255 : 0;
+    var ratio = Math.min(Math.abs(amount), 1);
+
+    red = Math.round(red + (target - red) * ratio);
+    green = Math.round(green + (target - green) * ratio);
+    blue = Math.round(blue + (target - blue) * ratio);
+
+    return "#" + [red, green, blue].map(function (value) {
+      return value.toString(16).padStart(2, "0");
+    }).join("");
   }
 
   function syncMapSelection() {

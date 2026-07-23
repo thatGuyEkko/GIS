@@ -1185,35 +1185,17 @@ tbody tr:last-child td {
   color: var(--text-muted);
 }
 
-.travel-filter-card,
 .travel-map-card {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 8px;
 }
 
-.travel-filter-card {
-  padding: 10px 14px;
-}
-
-.travel-filter-card .section-head {
-  margin-bottom: 8px;
-  gap: 12px;
-}
-
-.travel-filter-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(220px, 280px));
-  gap: 8px 12px;
-  justify-content: start;
-  align-items: center;
-}
-
 .travel-filter-field {
   display: grid;
-  grid-template-columns: 82px minmax(0, 1fr);
+  grid-template-columns: max-content minmax(132px, 168px);
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   min-width: 0;
 }
 
@@ -1226,8 +1208,8 @@ tbody tr:last-child td {
 
 .travel-select {
   width: 100%;
-  min-height: 32px;
-  padding: 0 10px;
+  min-height: 30px;
+  padding: 0 8px;
   border: 1px solid var(--border);
   border-radius: 6px;
   background: var(--surface-subtle);
@@ -1242,8 +1224,8 @@ tbody tr:last-child td {
 }
 
 .travel-reset-btn {
-  min-height: 28px;
-  padding: 0 10px;
+  min-height: 30px;
+  padding: 0 12px;
   border: 1px solid #dbc9f0;
   border-radius: 6px;
   background: var(--purple-light);
@@ -1258,7 +1240,28 @@ tbody tr:last-child td {
 }
 
 .travel-map-card {
-  padding: 18px;
+  padding: 14px 14px 16px;
+}
+
+.travel-map-toolbar {
+  margin-bottom: 10px;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.travel-map-toolbar .section-title {
+  flex: 0 0 auto;
+  line-height: 1.2;
+}
+
+.travel-map-toolbar-actions {
+  margin-left: auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px 10px;
 }
 
 .travel-map-shell {
@@ -1499,10 +1502,6 @@ tbody tr:last-child td {
     grid-template-columns: 1fr;
   }
 
-  .travel-filter-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
   .travel-map-shell {
     grid-template-columns: minmax(0, 1.7fr) minmax(300px, 1fr);
   }
@@ -1594,7 +1593,6 @@ tbody tr:last-child td {
     grid-template-columns: 1fr;
   }
 
-  .travel-filter-grid,
   .travel-hover-stats {
     grid-template-columns: 1fr;
   }
@@ -1603,6 +1601,16 @@ tbody tr:last-child td {
     grid-template-columns: 1fr;
     align-items: stretch;
     gap: 6px;
+  }
+
+  .travel-map-toolbar {
+    align-items: flex-start;
+  }
+
+  .travel-map-toolbar-actions {
+    margin-left: 0;
+    width: 100%;
+    justify-content: flex-start;
   }
 
   .travel-map-shell {
@@ -1662,13 +1670,11 @@ tbody tr:last-child td {
     padding: 20px 14px 32px;
   }
 
-  .travel-filter-card,
   .travel-map-card,
   .info-panel {
     padding: 16px;
   }
 
-  .travel-filter-grid,
   .travel-hover-stats {
     grid-template-columns: 1fr;
   }
