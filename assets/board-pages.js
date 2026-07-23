@@ -98,28 +98,29 @@
 
   // 国家经纬度 [纬度 lat, 经度 lon]，用于 ECharts geo 坐标系定位气泡。
   // 未在此表的国家的商机仅进入右侧「区域关注清单」，地图上不画气泡。
+  // 国家经纬度与中文名，key 为 ISO alpha-2 代码（与 opportunities.csv / leads.csv / travel_intel 的 country 字段一致）
   var GEO = {
-    "日本": [36, 138],
-    "韩国": [36, 128],
-    "越南": [16, 106],
-    "泰国": [15, 101],
-    "印尼": [-2, 118],
-    "新加坡": [1.3, 103.8],
-    "马来西亚": [4, 110],
-    "沙特": [24, 45],
-    "土耳其": [39, 35],
-    "巴西": [-10, -52],
-    "印度": [22, 79],
-    "菲律宾": [13, 122],
-    "美国": [39, -98],
-    "墨西哥": [23, -102],
-    "阿联酋": [24, 54],
-    "埃及": [27, 30],
-    "南非": [-30, 25],
-    "澳大利亚": [-25, 134],
-    "英国": [54, -2],
-    "德国": [51, 10],
-    "法国": [47, 2]
+    "JP": { name: "日本", ll: [36, 138] },
+    "KR": { name: "韩国", ll: [36, 128] },
+    "VN": { name: "越南", ll: [16, 106] },
+    "TH": { name: "泰国", ll: [15, 101] },
+    "ID": { name: "印尼", ll: [-2, 118] },
+    "SG": { name: "新加坡", ll: [1.3, 103.8] },
+    "MY": { name: "马来西亚", ll: [4, 110] },
+    "SA": { name: "沙特", ll: [24, 45] },
+    "TR": { name: "土耳其", ll: [39, 35] },
+    "BR": { name: "巴西", ll: [-10, -52] },
+    "IN": { name: "印度", ll: [22, 79] },
+    "PH": { name: "菲律宾", ll: [13, 122] },
+    "US": { name: "美国", ll: [39, -98] },
+    "MX": { name: "墨西哥", ll: [23, -102] },
+    "AE": { name: "阿联酋", ll: [24, 54] },
+    "EG": { name: "埃及", ll: [27, 30] },
+    "ZA": { name: "南非", ll: [-30, 25] },
+    "AU": { name: "澳大利亚", ll: [-25, 134] },
+    "GB": { name: "英国", ll: [54, -2] },
+    "DE": { name: "德国", ll: [51, 10] },
+    "FR": { name: "法国", ll: [47, 2] }
   };
 
   // 气泡配色与主题一致；优先级：已完成 > 推进中 > 观望/暂停 > 关闭 > 在管(蓝)
@@ -246,7 +247,7 @@
       list.forEach(function (o) { var t = o["type"]; if (t) types[t] = (types[t] || 0) + 1; });
       var note = Object.keys(types).join("、") || "—";
       var pct = max ? Math.round((n / max) * 100) : 0;
-      return '<div class="map-list-item" data-country="' + esc(c) + '"><div><div class="map-list-name">' + esc(c) + '</div>' +
+      return '<div class="map-list-item" data-country="' + esc(c) + '"><div><div class="map-list-name">' + esc(GEO[c] ? GEO[c].name : c) + '</div>' +
         '<div class="map-list-note">' + esc(note) + '</div></div>' +
         '<div class="bar-track"><div class="bar-fill" style="width:' + pct + '%;background:var(--purple);"></div></div>' +
         '<div class="map-list-score">' + n + '</div></div>';
@@ -272,8 +273,8 @@
       var list = byCountry[c];
       var n = list.length;
       points.push({
-        name: c,
-        value: [g[1], g[0], n], // [经度, 纬度, 数量]
+        name: c,                       // ISO 代码，供地图联动匹配
+        value: [g.ll[1], g.ll[0], n],  // [经度, 纬度, 数量]
         itemStyle: { color: bubbleHex(list) },
         _list: list // 原商机数组，供 tooltip 明细展示
       });
@@ -301,7 +302,8 @@
             return '<div class="tt-row"><span class="tt-name">' + esc(o["name"] || "商机") + '</span>' +
               '<span class="tt-meta">' + esc(meta) + '</span></div>';
           }).join("");
-          return '<div class="tt-title">' + esc(p.name) + '：<b>' + p.value[2] + '</b> 个商机</div>' + rows;
+          var cnName = GEO[p.name] ? GEO[p.name].name : p.name;
+          return '<div class="tt-title">' + esc(cnName) + '：<b>' + p.value[2] + '</b> 个商机</div>' + rows;
         }
       },
       geo: {
