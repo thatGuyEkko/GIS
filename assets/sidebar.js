@@ -138,6 +138,7 @@
 
   function setFrameHeight(nextHeight) {
     var height = Number(nextHeight);
+    var minViewportHeight = Math.max(window.innerHeight || 0, 320);
 
     if (!Number.isFinite(height) || height <= 0) {
       try {
@@ -157,7 +158,7 @@
       }
     }
 
-    frame.style.height = Math.max(Math.ceil(height), 320) + 'px';
+    frame.style.height = Math.max(Math.ceil(height), minViewportHeight) + 'px';
   }
 
   function renderRoute(route, detailCode, options) {
