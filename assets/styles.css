@@ -542,12 +542,40 @@ a {
 
 .map-panel {
   position: relative;
-  min-height: 330px;
-  padding: 22px;
+  align-self: start;
+  aspect-ratio: 2 / 1;
+  min-height: 320px;
+  padding: 0;
   border-radius: 8px;
-  background: linear-gradient(180deg, #ebf4fa 0%, #f8f4ec 45%, #f3efe4 100%);
+  background: linear-gradient(180deg, #eef5fa 0%, #f6f3ea 45%, #f1ede2 100%);
   border: 1px solid var(--border);
   overflow: hidden;
+}
+
+/* 真实世界地图底图：等距圆柱投影，铺满面板并与气泡经纬度换算对齐 */
+.map-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* ECharts 世界地图容器，铺满地图面板 */
+.map-chart {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+
+.map-bg path {
+  fill: rgba(120, 142, 162, 0.26);
+  stroke: rgba(120, 142, 162, 0.55);
+  stroke-width: 0.3;
+  vector-effect: non-scaling-stroke;
 }
 
 .map-region {
@@ -559,6 +587,8 @@ a {
 .map-bubble {
   position: absolute;
   text-align: center;
+  transform: translate(-50%, -50%);
+  z-index: 1;
 }
 
 .bubble-dot {
@@ -603,6 +633,7 @@ a {
   position: absolute;
   left: 50%;
   bottom: 10px;
+  z-index: 2;
   transform: translateX(-50%);
   display: flex;
   flex-wrap: wrap;
@@ -643,6 +674,13 @@ a {
   padding: 10px 12px;
   background: var(--surface-subtle);
   border-radius: 8px;
+  cursor: pointer;
+  transition: background .15s, box-shadow .15s;
+}
+
+.map-list-item.hl {
+  background: rgba(33, 102, 177, .12);
+  box-shadow: inset 3px 0 0 var(--blue);
 }
 
 .map-list-name {
@@ -660,6 +698,12 @@ a {
   font-size: 12px;
   font-weight: 600;
 }
+
+/* 地图气泡 tooltip 商机明细 */
+.tt-title { font-weight: 600; margin-bottom: 6px; font-size: 12px; }
+.tt-row { display: flex; justify-content: space-between; gap: 16px; line-height: 1.7; }
+.tt-name { max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tt-meta { color: #c9d2da; font-size: 11px; white-space: nowrap; }
 
 .table-card {
   overflow-x: auto;
