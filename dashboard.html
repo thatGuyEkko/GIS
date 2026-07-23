@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>OOMS | 商机看板</title>
   <link rel="stylesheet" href="assets/styles.css">
+  <script src="assets/vendor/echarts.min.js" defer></script>
+  <script src="assets/vendor/echarts-world.js" defer></script>
 </head>
 <body class="content-page">
   <main class="content">
@@ -84,12 +86,7 @@
 
       <div class="world-grid">
         <div class="map-panel">
-          <div class="map-region" style="top:16px;left:26px;">东亚</div>
-          <div class="map-region" style="top:112px;left:44px;">东南亚</div>
-          <div class="map-region" style="top:18px;right:34px;">中东</div>
-          <div class="map-region" style="bottom:56px;left:24px;">南美</div>
-
-          <div id="map-bubbles" style="position:absolute;inset:0;"></div>
+          <div id="map-chart" class="map-chart"></div>
 
           <div class="map-legend">
             <span class="legend-item"><span class="legend-dot" style="background:var(--purple);"></span><span id="lg-prog">推进中</span></span>

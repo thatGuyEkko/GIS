@@ -96,19 +96,52 @@
     }).join("");
   }
 
-  // 国家在抽象地图上的坐标（百分比），未知国家仅进入右侧清单
-  var COORD = {
-    "日本": { top: 13, left: 63 },
-    "韩国": { top: 19, left: 66 },
-    "越南": { top: 42, left: 53 },
-    "泰国": { top: 38, left: 32 },
-    "印尼": { top: 56, left: 60 },
-    "新加坡": { top: 50, left: 62 },
-    "马来西亚": { top: 46, left: 58 },
-    "沙特": { top: 26, left: 79 },
-    "巴西": { top: 67, left: 16 },
-    "土耳其": { top: 24, left: 55 }
+  // 国家经纬度 [纬度 lat, 经度 lon]，用于 ECharts geo 坐标系定位气泡。
+  // 未在此表的国家的商机仅进入右侧「区域关注清单」，地图上不画气泡。
+  var GEO = {
+    "日本": [36, 138],
+    "韩国": [36, 128],
+    "越南": [16, 106],
+    "泰国": [15, 101],
+    "印尼": [-2, 118],
+    "新加坡": [1.3, 103.8],
+    "马来西亚": [4, 110],
+    "沙特": [24, 45],
+    "土耳其": [39, 35],
+    "巴西": [-10, -52],
+    "印度": [22, 79],
+    "菲律宾": [13, 122],
+    "美国": [39, -98],
+    "墨西哥": [23, -102],
+    "阿联酋": [24, 54],
+    "埃及": [27, 30],
+    "南非": [-30, 25],
+    "澳大利亚": [-25, 134],
+    "英国": [54, -2],
+    "德国": [51, 10],
+    "法国": [47, 2]
   };
+
+  // 气泡配色与主题一致；优先级：已完成 > 推进中 > 观望/暂停 > 关闭 > 在管(蓝)
+  var STATUS_HEX = {
+    blue: "#2166b1",
+    purple: "#6b3fa0",
+    green: "#5c8c2b",
+    orange: "#b87420",
+    gray: "#7c7b73"
+  };
+
+  function bubbleHex(list) {
+    var color = STATUS_HEX.blue;
+    list.forEach(function (o) {
+      var s = o["status"];
+      if (s === "已完成") color = STATUS_HEX.green;
+      else if (s === "推进中" && color !== STATUS_HEX.green) color = STATUS_HEX.purple;
+      else if ((s === "观望中" || s === "暂停") && color === STATUS_HEX.blue) color = STATUS_HEX.orange;
+      else if (CLOSED.indexOf(s) >= 0 && color === STATUS_HEX.blue) color = STATUS_HEX.gray;
+    });
+    return color;
+  }
 
   function bubbleSize(n) {
     if (n >= 4) return "bubble-lg";
@@ -203,26 +236,7 @@
     });
     var countries = Object.keys(byCountry);
 
-    var bubbleHtml = "";
-    countries.forEach(function (c) {
-      var list = byCountry[c];
-      var coord = COORD[c];
-      if (!coord) return;
-      var n = list.length;
-      var color = "tag-blue";
-      list.forEach(function (o) {
-        var s = o["status"];
-        if (s === "已完成") color = "tag-green";
-        else if (s === "推进中" && color !== "tag-green") color = "tag-purple";
-        else if ((s === "观望中" || s === "暂停") && color === "tag-blue") color = "tag-orange";
-        else if (CLOSED.indexOf(s) >= 0 && color === "tag-blue") color = "tag-gray";
-      });
-      bubbleHtml += '<div class="map-bubble" style="top:' + coord.top + '%;left:' + coord.left + '%;">' +
-        '<div class="bubble-dot ' + bubbleSize(n) + ' ' + color + '">' + n + '</div>' +
-        '<div class="bubble-label" style="color:var(--text);">' + esc(c) + '</div></div>';
-    });
-    setHTML("map-bubbles", bubbleHtml);
-
+    // 右侧「区域关注清单」（与地图渲染方式无关，保留原逻辑）
     var sorted = countries.map(function (c) { return [c, byCountry[c]]; })
       .sort(function (a, b) { return b[1].length - a[1].length; });
     var max = sorted.length ? sorted[0][1].length : 1;
@@ -232,12 +246,139 @@
       list.forEach(function (o) { var t = o["type"]; if (t) types[t] = (types[t] || 0) + 1; });
       var note = Object.keys(types).join("、") || "—";
       var pct = max ? Math.round((n / max) * 100) : 0;
-      return '<div class="map-list-item"><div><div class="map-list-name">' + esc(c) + '</div>' +
+      return '<div class="map-list-item" data-country="' + esc(c) + '"><div><div class="map-list-name">' + esc(c) + '</div>' +
         '<div class="map-list-note">' + esc(note) + '</div></div>' +
         '<div class="bar-track"><div class="bar-fill" style="width:' + pct + '%;background:var(--purple);"></div></div>' +
         '<div class="map-list-score">' + n + '</div></div>';
     }).join("");
     setHTML("region-list", listHtml || '<div class="chart-note">暂无商机数据</div>');
+
+    // ECharts 世界地图 + 散点气泡
+    var node = document.getElementById("map-chart");
+    if (!node) return;
+    if (!window.echarts || typeof window.echarts.init !== "function") {
+      showError("ECharts 组件未加载，请检查 assets/vendor/echarts.min.js。");
+      return;
+    }
+    if (!window.echarts.getMap || !window.echarts.getMap("world")) {
+      showError("ECharts 世界地图数据未加载，请检查 assets/vendor/echarts-world.js。");
+      return;
+    }
+
+    var points = [];
+    countries.forEach(function (c) {
+      var g = GEO[c];
+      if (!g) return;
+      var list = byCountry[c];
+      var n = list.length;
+      points.push({
+        name: c,
+        value: [g[1], g[0], n], // [经度, 纬度, 数量]
+        itemStyle: { color: bubbleHex(list) },
+        _list: list // 原商机数组，供 tooltip 明细展示
+      });
+    });
+
+    if (window.__dashboardMap) {
+      window.__dashboardMap.dispose();
+      window.__dashboardMap = null;
+    }
+    var chart = window.echarts.init(node);
+    window.__dashboardMap = chart;
+
+    chart.setOption({
+      animation: false,
+      tooltip: {
+        trigger: "item",
+        backgroundColor: "rgba(33,39,46,.92)",
+        borderWidth: 0,
+        textStyle: { color: "#fff", fontSize: 12 },
+        formatter: function (p) {
+          if (p.seriesType !== "scatter" || !p.data) return "";
+          var list = p.data._list || [];
+          var rows = list.map(function (o) {
+            var meta = [o["type"], o["status"], o["score"]].filter(Boolean).join(" · ");
+            return '<div class="tt-row"><span class="tt-name">' + esc(o["name"] || "商机") + '</span>' +
+              '<span class="tt-meta">' + esc(meta) + '</span></div>';
+          }).join("");
+          return '<div class="tt-title">' + esc(p.name) + '：<b>' + p.value[2] + '</b> 个商机</div>' + rows;
+        }
+      },
+      geo: {
+        map: "world",
+        roam: true,
+        silent: true,
+        left: 0, right: 0, top: 8, bottom: 8,
+        itemStyle: {
+          areaColor: "#dbe4ea",
+          borderColor: "#ffffff",
+          borderWidth: 0.5
+        },
+        emphasis: {
+          itemStyle: { areaColor: "#c6d3dc" },
+          label: { show: false }
+        },
+        label: { show: false }
+      },
+      series: [{
+        type: "scatter",
+        coordinateSystem: "geo",
+        data: points,
+        symbolSize: function (val) {
+          var n = val[2];
+          return Math.max(12, Math.min(42, 12 + n * 7));
+        },
+        itemStyle: {
+          borderColor: "#ffffff",
+          borderWidth: 1.5,
+          opacity: 0.92
+        },
+        label: {
+          show: true,
+          formatter: function (p) { return p.value[2]; },
+          color: "#ffffff",
+          fontWeight: 600,
+          fontSize: 11
+        },
+        emphasis: {
+          scale: 1.15,
+          label: { show: true },
+          itemStyle: { shadowBlur: 10, shadowColor: "rgba(0,0,0,.35)" }
+        },
+        z: 10
+      }]
+    });
+
+    // 联动：地图气泡 <-> 右侧「区域关注清单」双向高亮
+    function hlListItem(country, on) {
+      document.querySelectorAll("#region-list .map-list-item").forEach(function (it) {
+        if (it.getAttribute("data-country") === country) it.classList.toggle("hl", !!on);
+      });
+    }
+    chart.on("mouseover", function (params) {
+      if (params.componentType === "series" && params.seriesType === "scatter") hlListItem(params.name, true);
+    });
+    chart.on("mouseout", function (params) {
+      if (params.componentType === "series" && params.seriesType === "scatter") hlListItem(params.name, false);
+    });
+    document.querySelectorAll("#region-list .map-list-item").forEach(function (it) {
+      var c = it.getAttribute("data-country");
+      it.addEventListener("mouseenter", function () {
+        chart.dispatchAction({ type: "highlight", seriesIndex: 0, name: c });
+        hlListItem(c, true);
+      });
+      it.addEventListener("mouseleave", function () {
+        chart.dispatchAction({ type: "downplay", seriesIndex: 0, name: c });
+        hlListItem(c, false);
+      });
+    });
+
+    if (!window.__dashboardMapResized) {
+      window.__dashboardMapResized = true;
+      window.addEventListener("resize", function () {
+        if (window.__dashboardMap) window.__dashboardMap.resize();
+      });
+    }
   }
 
   function renderRecent(leads, opps) {
