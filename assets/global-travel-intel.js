@@ -84,6 +84,103 @@
     "#e76f51",
     "#577590"
   ];
+  var travelProductLineDefinitions = [
+    { key: "flight", label: "机票" },
+    { key: "hotel", label: "酒店" },
+    { key: "homestay", label: "民宿" },
+    { key: "rail", label: "轨道交通" },
+    { key: "car_rental", label: "租车" },
+    { key: "vacation", label: "度假旅游" },
+    { key: "cruise", label: "游轮" }
+  ];
+  var travelCountryTableColumns = [
+    {
+      key: "country_name",
+      label: "国家",
+      type: "string",
+      getValue: function (country) { return country.country_name; },
+      format: function (country) { return country.country_name || "-"; }
+    },
+    {
+      key: "population_value",
+      label: "人口",
+      type: "number",
+      getValue: function (country) { return country.population_value; },
+      format: function (country) { return formatPopulation(country.population_value); }
+    },
+    {
+      key: "population_growth_rate",
+      label: "人口增速",
+      type: "number",
+      getValue: function (country) { return country.population_growth_rate; },
+      format: function (country) { return formatPercent(country.population_growth_rate); }
+    },
+    {
+      key: "gdp_display",
+      label: "GDP",
+      type: "metric-text",
+      getValue: function (country) { return country.gdp_display; },
+      format: function (country) { return country.gdp_display || "-"; }
+    },
+    {
+      key: "inbound_travelers_annual",
+      label: "年入境游人口数",
+      type: "number",
+      getValue: function (country) { return country.inbound_travelers_annual; },
+      format: function (country) { return formatPopulation(country.inbound_travelers_annual); }
+    },
+    {
+      key: "inbound_spend_cny_annual",
+      label: "入境游消费金额",
+      type: "number",
+      getValue: function (country) { return country.inbound_spend_cny_annual; },
+      format: function (country) { return formatCurrencyCny(country.inbound_spend_cny_annual); }
+    },
+    {
+      key: "outbound_travelers_annual",
+      label: "年出境游人口数",
+      type: "number",
+      getValue: function (country) { return country.outbound_travelers_annual; },
+      format: function (country) { return formatPopulation(country.outbound_travelers_annual); }
+    },
+    {
+      key: "outbound_spend_cny_annual",
+      label: "出境游消费金额",
+      type: "number",
+      getValue: function (country) { return country.outbound_spend_cny_annual; },
+      format: function (country) { return formatCurrencyCny(country.outbound_spend_cny_annual); }
+    },
+    {
+      key: "domestic_travelers_annual",
+      label: "年境内游人口数",
+      type: "number",
+      getValue: function (country) { return country.domestic_travelers_annual; },
+      format: function (country) { return formatPopulation(country.domestic_travelers_annual); }
+    },
+    {
+      key: "domestic_spend_cny_annual",
+      label: "境内游消费金额",
+      type: "number",
+      getValue: function (country) { return country.domestic_spend_cny_annual; },
+      format: function (country) { return formatCurrencyCny(country.domestic_spend_cny_annual); }
+    }
+  ].concat(travelProductLineDefinitions.reduce(function (result, definition) {
+    result.push({
+      key: definition.key + "_spend_cny_annual",
+      label: definition.label + "消费金额",
+      type: "number",
+      getValue: function (country) { return country[definition.key + "_spend_cny_annual"]; },
+      format: function (country) { return formatCurrencyCny(country[definition.key + "_spend_cny_annual"]); }
+    });
+    result.push({
+      key: definition.key + "_growth_rate",
+      label: definition.label + "增速",
+      type: "number",
+      getValue: function (country) { return country[definition.key + "_growth_rate"]; },
+      format: function (country) { return formatPercent(country[definition.key + "_growth_rate"]); }
+    });
+    return result;
+  }, []));
 
   if (!pageRoot) {
     return;
@@ -119,7 +216,9 @@
     language: "全部",
     category: "全部",
     lockedCountryCode: null,
-    hoverCountryCode: null
+    hoverCountryCode: null,
+    tableSortKey: "country_name",
+    tableSortDirection: "asc"
   };
 
   if (window.location.protocol === "file:") {
@@ -240,6 +339,29 @@
         opportunity_summary: String(item.opportunity_summary || "").trim(),
         focus_level: String(item.focus_level || "").trim() || "观察",
         headline_metric: String(item.headline_metric || "").trim(),
+        gdp_display: String(item.gdp_display || "").trim(),
+        currency: String(item.currency || "").trim(),
+        inbound_travelers_annual: toOptionalNumber(item.inbound_travelers_annual),
+        inbound_spend_cny_annual: toOptionalNumber(item.inbound_spend_cny_annual),
+        outbound_travelers_annual: toOptionalNumber(item.outbound_travelers_annual),
+        outbound_spend_cny_annual: toOptionalNumber(item.outbound_spend_cny_annual),
+        domestic_travelers_annual: toOptionalNumber(item.domestic_travelers_annual),
+        domestic_spend_cny_annual: toOptionalNumber(item.domestic_spend_cny_annual),
+        travel_product_lines: buildTravelProductLines(item),
+        flight_spend_cny_annual: toOptionalNumber(item.flight_spend_cny_annual),
+        flight_growth_rate: toOptionalNumber(item.flight_growth_rate),
+        hotel_spend_cny_annual: toOptionalNumber(item.hotel_spend_cny_annual),
+        hotel_growth_rate: toOptionalNumber(item.hotel_growth_rate),
+        homestay_spend_cny_annual: toOptionalNumber(item.homestay_spend_cny_annual),
+        homestay_growth_rate: toOptionalNumber(item.homestay_growth_rate),
+        rail_spend_cny_annual: toOptionalNumber(item.rail_spend_cny_annual),
+        rail_growth_rate: toOptionalNumber(item.rail_growth_rate),
+        car_rental_spend_cny_annual: toOptionalNumber(item.car_rental_spend_cny_annual),
+        car_rental_growth_rate: toOptionalNumber(item.car_rental_growth_rate),
+        vacation_spend_cny_annual: toOptionalNumber(item.vacation_spend_cny_annual),
+        vacation_growth_rate: toOptionalNumber(item.vacation_growth_rate),
+        cruise_spend_cny_annual: toOptionalNumber(item.cruise_spend_cny_annual),
+        cruise_growth_rate: toOptionalNumber(item.cruise_growth_rate),
         map_enabled_flag: toBoolean(item.map_enabled_flag),
         display_order: toOptionalNumber(item.display_order),
         news: [],
@@ -337,6 +459,17 @@
     };
   }
 
+  function buildTravelProductLines(item) {
+    return travelProductLineDefinitions.map(function (definition) {
+      return {
+        key: definition.key,
+        label: definition.label,
+        spend_cny_annual: toOptionalNumber(item[definition.key + "_spend_cny_annual"]),
+        growth_rate: toOptionalNumber(item[definition.key + "_growth_rate"])
+      };
+    });
+  }
+
   function renderPage() {
     if (!ensureChartRuntime()) {
       return;
@@ -424,6 +557,7 @@
   function bindEvents() {
     var filterNodes = pageRoot.querySelectorAll("[data-travel-filter]");
     var resetButton = pageRoot.querySelector("[data-travel-action='reset']");
+    var panelNode = pageRoot.querySelector("[data-travel-info]");
 
     Array.prototype.forEach.call(filterNodes, function (node) {
       node.addEventListener("change", function (event) {
@@ -442,6 +576,36 @@
         state.lockedCountryCode = null;
         state.hoverCountryCode = null;
         renderPage();
+      });
+    }
+
+    if (panelNode) {
+      panelNode.addEventListener("click", function (event) {
+        var sortTrigger = event.target.closest("[data-travel-sort-key]");
+        if (sortTrigger) {
+          updateTableSort(sortTrigger.getAttribute("data-travel-sort-key"));
+          syncHoverCard();
+          return;
+        }
+
+        var rowNode = event.target.closest("[data-travel-country-row]");
+        if (rowNode) {
+          toggleLockedCountryFromTable(rowNode.getAttribute("data-travel-country-row"));
+        }
+      });
+
+      panelNode.addEventListener("keydown", function (event) {
+        var rowNode = event.target.closest("[data-travel-country-row]");
+        if (!rowNode) {
+          return;
+        }
+
+        if (event.key !== "Enter" && event.key !== " ") {
+          return;
+        }
+
+        event.preventDefault();
+        toggleLockedCountryFromTable(rowNode.getAttribute("data-travel-country-row"));
       });
     }
   }
@@ -1113,8 +1277,10 @@
       return;
     }
 
-    var country = getDisplayedCountry(currentView.visibleCountries);
-    panelNode.innerHTML = buildHoverCard(country);
+    var country = getDisplayedCountry(currentView.filteredCountries);
+    panelNode.innerHTML = country
+      ? buildHoverCard(country)
+      : buildHoverEmptyState(currentView.filteredCountries);
   }
 
   function buildSelectField(label, key, options, selectedValue) {
@@ -1407,7 +1573,7 @@
 
   function buildHoverCard(country) {
     if (!country) {
-      return buildHoverEmptyState();
+      return buildHoverEmptyState(currentView ? currentView.filteredCountries : []);
     }
 
     var primaryNews = resolvePrimaryNews(country.news);
@@ -1428,11 +1594,14 @@
       '  </div>',
       '  <div class="travel-hover-stats">',
       buildHoverMetric("人口", formatPopulation(country.population_value)),
-      buildHoverMetric("增长率", formatPercent(country.population_growth_rate)),
       buildHoverMetric("官方语言", country.official_language),
+      buildHoverMetric("线索", country.leads.length ? String(country.leads.length) + " 条" : "-"),
+      buildHoverMetric("商机", country.opportunities.length ? String(country.opportunities.length) + " 条" : "-"),
       '  </div>',
       buildHoverSection("国家关键数据", country.headline_metric || "待补充"),
       buildHoverSection("市场概况", country.tourism_overview || "待补充"),
+      buildHoverTravelOverviewSection(country),
+      buildHoverTravelProductLinesSection(country),
       buildHoverNewsSection("旅游业重要新闻信息", primaryNews),
       buildHoverNewsSection("关联的重要新闻信息", relatedNews),
       buildHoverBusinessSection(country),
@@ -1441,14 +1610,203 @@
     ].join("");
   }
 
-  function buildHoverEmptyState() {
+  function buildHoverEmptyState(countries) {
+    var visibleCountries = Array.isArray(countries) ? countries : [];
+    var sortedCountries = sortCountriesForTable(visibleCountries);
+    var columnCount = travelCountryTableColumns.length;
+
     return [
-      '<div class="travel-info-empty">',
-      '  <div class="travel-info-empty-kicker">国家信息面板</div>',
-      '  <div class="travel-info-empty-title">先将鼠标悬停到地图中的国家上</div>',
-      '  <div class="travel-info-empty-copy">悬停会展示对应国家的商机、线索、新闻与展会信息；点击国家可锁定，再次点击同一国家可取消锁定。</div>',
+      '<div class="travel-info-table-state">',
+      '  <div class="travel-info-table-head">',
+      '    <div class="travel-info-empty-kicker">国家信息面板</div>',
+      '    <div class="travel-info-empty-copy">当前未选中国家。将鼠标悬停到地图中的国家上可预览详情，点击地图中的国家或下表国家行可锁定对应信息；表头支持按各维度排序。当前展示 ' + escapeHtml(String(sortedCountries.length)) + ' 个国家。</div>',
+      '  </div>',
+      '  <div class="travel-info-table-scroll">',
+      '    <table class="travel-country-table">',
+      '      <thead>',
+      '        <tr>',
+      travelCountryTableColumns.map(buildCountryTableHeaderCell).join(""),
+      '        </tr>',
+      '      </thead>',
+      '      <tbody>',
+      sortedCountries.length
+        ? sortedCountries.map(buildCountryTableRow).join("")
+        : '<tr><td class="travel-country-table-empty" colspan="' + escapeHtml(String(columnCount)) + '">当前筛选条件下暂无国家数据</td></tr>',
+      '      </tbody>',
+      '    </table>',
+      '  </div>',
       '</div>'
     ].join("");
+  }
+
+  function buildCountryTableHeaderCell(column) {
+    var isActive = state.tableSortKey === column.key;
+    var direction = isActive ? state.tableSortDirection : "";
+    var sortLabel = direction === "asc" ? "升序" : direction === "desc" ? "降序" : "未排序";
+    var indicator = direction === "asc" ? "↑" : direction === "desc" ? "↓" : "↕";
+    var ariaSort = !isActive ? "none" : direction === "asc" ? "ascending" : "descending";
+
+    return [
+      '<th class="' + escapeHtml(column.key === "country_name" ? "travel-country-table-sticky" : "") + '" aria-sort="' + escapeHtml(ariaSort) + '">',
+      '  <button type="button" class="travel-country-table-sort' + (isActive ? ' active' : '') + '" data-travel-sort-key="' + escapeHtml(column.key) + '" title="按' + escapeHtml(column.label) + sortLabel + '">',
+      '    <span>' + escapeHtml(column.label) + '</span>',
+      '    <span class="travel-country-table-sort-indicator">' + indicator + '</span>',
+      '  </button>',
+      '</th>'
+    ].join("");
+  }
+
+  function buildCountryTableRow(country) {
+    return [
+      '<tr class="travel-country-table-row" data-travel-country-row="' + escapeHtml(country.country_code) + '" tabindex="0" role="button" aria-label="查看' + escapeHtml(country.country_name) + '详情">',
+      travelCountryTableColumns.map(function (column) {
+        return buildCountryTableCell(column, country);
+      }).join(""),
+      '</tr>'
+    ].join("");
+  }
+
+  function buildCountryTableCell(column, country) {
+    var formattedValue = column.format(country);
+    var classNames = ["travel-country-table-cell"];
+
+    if (column.key === "country_name") {
+      classNames.push("travel-country-table-sticky");
+      classNames.push("travel-country-table-country");
+    } else if (column.type === "number") {
+      classNames.push("mono");
+    }
+
+    return '<td class="' + escapeHtml(classNames.join(" ")) + '">' + escapeHtml(formattedValue || "-") + '</td>';
+  }
+
+  function updateTableSort(sortKey) {
+    var column = getCountryTableColumn(sortKey);
+    if (!column) {
+      return;
+    }
+
+    if (state.tableSortKey === sortKey) {
+      state.tableSortDirection = state.tableSortDirection === "asc" ? "desc" : "asc";
+      return;
+    }
+
+    state.tableSortKey = sortKey;
+    state.tableSortDirection = column.type === "string" ? "asc" : "desc";
+  }
+
+  function toggleLockedCountryFromTable(code) {
+    if (!code) {
+      return;
+    }
+
+    state.hoverCountryCode = null;
+    toggleLockedCountry(code);
+  }
+
+  function sortCountriesForTable(countries) {
+    var column = getCountryTableColumn(state.tableSortKey) || travelCountryTableColumns[0];
+    var directionFactor = state.tableSortDirection === "asc" ? 1 : -1;
+
+    return countries.slice().sort(function (left, right) {
+      var result = compareCountryTableValues(left, right, column) * directionFactor;
+
+      if (result !== 0) {
+        return result;
+      }
+
+      if (left.display_order !== right.display_order) {
+        return left.display_order - right.display_order;
+      }
+
+      return String(left.country_name || "").localeCompare(String(right.country_name || ""), "zh-CN");
+    });
+  }
+
+  function compareCountryTableValues(leftCountry, rightCountry, column) {
+    var leftValue = getComparableCountryTableValue(leftCountry, column);
+    var rightValue = getComparableCountryTableValue(rightCountry, column);
+
+    if (leftValue === null && rightValue === null) {
+      return 0;
+    }
+
+    if (leftValue === null) {
+      return 1;
+    }
+
+    if (rightValue === null) {
+      return -1;
+    }
+
+    if (typeof leftValue === "number" && typeof rightValue === "number") {
+      return leftValue - rightValue;
+    }
+
+    return String(leftValue).localeCompare(String(rightValue), "zh-CN");
+  }
+
+  function getComparableCountryTableValue(country, column) {
+    var rawValue = column && typeof column.getValue === "function"
+      ? column.getValue(country)
+      : null;
+
+    if (!hasValue(rawValue)) {
+      return null;
+    }
+
+    if (column.type === "number") {
+      return Number.isFinite(rawValue) ? rawValue : Number(rawValue);
+    }
+
+    if (column.type === "metric-text") {
+      var numericValue = parseMetricDisplayValue(rawValue);
+      return numericValue === null ? String(rawValue).trim() : numericValue;
+    }
+
+    return String(rawValue).trim();
+  }
+
+  function getCountryTableColumn(key) {
+    return travelCountryTableColumns.find(function (column) {
+      return column.key === key;
+    }) || null;
+  }
+
+  function parseMetricDisplayValue(value) {
+    var text = String(value || "").trim();
+    if (!text) {
+      return null;
+    }
+
+    var match = text.replace(/,/g, "").match(/-?\d+(?:\.\d+)?/);
+    if (!match) {
+      return null;
+    }
+
+    var numericValue = Number(match[0]);
+    if (!Number.isFinite(numericValue)) {
+      return null;
+    }
+
+    var multiplier = 1;
+    var normalized = text.toLowerCase();
+
+    if (text.indexOf("万亿") !== -1 || normalized.indexOf("trillion") !== -1) {
+      multiplier = 1000000000000;
+    } else if (text.indexOf("千亿") !== -1) {
+      multiplier = 100000000000;
+    } else if (text.indexOf("百亿") !== -1) {
+      multiplier = 10000000000;
+    } else if (text.indexOf("亿") !== -1 || normalized.indexOf("billion") !== -1) {
+      multiplier = 100000000;
+    } else if (text.indexOf("百万") !== -1 || normalized.indexOf("million") !== -1) {
+      multiplier = 1000000;
+    } else if (text.indexOf("万") !== -1) {
+      multiplier = 10000;
+    }
+
+    return numericValue * multiplier;
   }
 
   function buildHoverMetric(label, value) {
@@ -1465,6 +1823,103 @@
       '<div class="travel-hover-section">',
       '  <div class="travel-hover-section-title">' + escapeHtml(title) + '</div>',
       '  <div class="travel-hover-copy">' + escapeHtml(copy || "待补充") + '</div>',
+      '</div>'
+    ].join("");
+  }
+
+  function buildHoverTravelOverviewSection(country) {
+    var items = [
+      {
+        label: "GDP",
+        formattedValue: country.gdp_display || "-",
+        rawValue: country.gdp_display
+      },
+      {
+        label: "币种",
+        formattedValue: country.currency || "-",
+        rawValue: country.currency
+      },
+      {
+        label: "年入境游人口数",
+        formattedValue: formatPopulation(country.inbound_travelers_annual),
+        rawValue: country.inbound_travelers_annual
+      },
+      {
+        label: "入境游消费金额",
+        formattedValue: formatCurrencyCny(country.inbound_spend_cny_annual),
+        rawValue: country.inbound_spend_cny_annual
+      },
+      {
+        label: "年出境游人口数",
+        formattedValue: formatPopulation(country.outbound_travelers_annual),
+        rawValue: country.outbound_travelers_annual
+      },
+      {
+        label: "出境游消费金额",
+        formattedValue: formatCurrencyCny(country.outbound_spend_cny_annual),
+        rawValue: country.outbound_spend_cny_annual
+      },
+      {
+        label: "年境内游人口数",
+        formattedValue: formatPopulation(country.domestic_travelers_annual),
+        rawValue: country.domestic_travelers_annual
+      },
+      {
+        label: "境内游消费金额",
+        formattedValue: formatCurrencyCny(country.domestic_spend_cny_annual),
+        rawValue: country.domestic_spend_cny_annual
+      }
+    ];
+
+    if (!items.some(function (item) {
+      return hasValue(item.rawValue);
+    })) {
+      return [
+        '<div class="travel-hover-section">',
+        '  <div class="travel-hover-section-title">基础信息与航旅数据</div>',
+        '  <div class="travel-hover-record empty-note">当前国家暂未补充基础信息与航旅业年度数据</div>',
+        '</div>'
+      ].join("");
+    }
+
+    return [
+      '<div class="travel-hover-section">',
+      '  <div class="travel-hover-section-title">基础信息与航旅数据</div>',
+      '  <div class="travel-hover-data-grid">',
+      items.map(buildHoverDataCard).join(""),
+      '  </div>',
+      '</div>'
+    ].join("");
+  }
+
+  function buildHoverTravelProductLinesSection(country) {
+    var records = country.travel_product_lines.filter(function (item) {
+      return hasValue(item.spend_cny_annual) || hasValue(item.growth_rate);
+    }).map(buildHoverTravelProductRecord).join("");
+
+    return [
+      '<div class="travel-hover-section">',
+      '  <div class="travel-hover-section-title">产品线消费与增速</div>',
+      records || '<div class="travel-hover-record empty-note">当前国家暂未补充产品线年度消费与增速数据</div>',
+      '</div>'
+    ].join("");
+  }
+
+  function buildHoverDataCard(item) {
+    return [
+      '<div class="travel-hover-data-card">',
+      '  <div class="travel-hover-data-label">' + escapeHtml(item.label || "待补充") + '</div>',
+      '  <div class="travel-hover-data-value">' + escapeHtml(item.formattedValue || "-") + '</div>',
+      '</div>'
+    ].join("");
+  }
+
+  function buildHoverTravelProductRecord(item) {
+    return [
+      '<div class="travel-hover-record">',
+      '  <div class="travel-hover-record-title">' + escapeHtml(item.label || "待补充") + '</div>',
+      buildHoverRecordDetail("年消费金额（人民币）", formatCurrencyCny(item.spend_cny_annual)),
+      buildHoverRecordDetail("年增长率", formatPercent(item.growth_rate)),
       '</div>'
     ].join("");
   }
@@ -1691,6 +2146,26 @@
     return trimDecimal(value) + "%";
   }
 
+  function formatCurrencyCny(value) {
+    if (value === null || value === undefined || Number.isNaN(value)) {
+      return "-";
+    }
+
+    if (Math.abs(value) >= 1000000000000) {
+      return "¥" + trimDecimal(value / 1000000000000) + "万亿";
+    }
+
+    if (Math.abs(value) >= 100000000) {
+      return "¥" + trimDecimal(value / 100000000) + "亿";
+    }
+
+    if (Math.abs(value) >= 10000) {
+      return "¥" + trimDecimal(value / 10000) + "万";
+    }
+
+    return "¥" + trimDecimal(value);
+  }
+
   function formatDateRange(start, end) {
     if (!start && !end) {
       return "待补充";
@@ -1746,6 +2221,10 @@
     }
 
     return value.toFixed(2).replace(/0+$/, "").replace(/\.$/, "");
+  }
+
+  function hasValue(value) {
+    return value !== null && value !== undefined && value !== "";
   }
 
   function escapeHtml(value) {
