@@ -1603,7 +1603,9 @@
       '  </div>',
       '  <div class="travel-hover-stats">',
       buildHoverMetric("人口", formatPopulation(country.population_value)),
-      buildHoverMetric("官方语言", country.official_language),
+      buildHoverMetric("语言", country.official_language),
+      buildHoverMetric("GDP", country.gdp_display || "-"),
+      buildHoverMetric("币种", country.currency || "-"),
       buildHoverMetric("线索", country.leads.length ? String(country.leads.length) + " 条" : "-"),
       buildHoverMetric("商机", country.opportunities.length ? String(country.opportunities.length) + " 条" : "-"),
       '  </div>',
@@ -1838,16 +1840,6 @@
 
   function buildHoverTravelOverviewSection(country) {
     var items = [
-      {
-        label: "GDP",
-        formattedValue: country.gdp_display || "-",
-        rawValue: country.gdp_display
-      },
-      {
-        label: "币种",
-        formattedValue: country.currency || "-",
-        rawValue: country.currency
-      },
       {
         label: "年入境游人口数",
         formattedValue: formatPopulation(country.inbound_travelers_annual),
