@@ -24,6 +24,17 @@
   // 关闭样本由状态判定（与展示约定一致）
   const CLOSED_STATUSES = ["筛查未通过", "初评未通过", "已放弃"];
 
+  // ISO alpha-2 代码 → 中文名（与全局 country 字段统一，UI 仍显示中文）
+  const CN_NAME = {
+    "JP": "日本", "KR": "韩国", "VN": "越南", "TH": "泰国", "ID": "印尼",
+    "SG": "新加坡", "MY": "马来西亚", "SA": "沙特", "TR": "土耳其", "IN": "印度",
+    "BR": "巴西", "PH": "菲律宾", "US": "美国", "MX": "墨西哥", "AE": "阿联酋",
+    "EG": "埃及", "ZA": "南非", "AU": "澳大利亚", "GB": "英国", "DE": "德国", "FR": "法国"
+  };
+  function cnCountry(code) {
+    return CN_NAME[String(code || "").trim().toUpperCase()] || (code || "-");
+  }
+
   // 线索模版表头 → 数据字段
   const LEAD_HEADERS = {
     "id": "记录ID",
@@ -297,7 +308,7 @@
     ];
 
     if (item["目标国家/城市"]) {
-      meta.push('<span class="tag tag-blue">' + escapeHtml(item["目标国家/城市"]) + '</span>');
+      meta.push('<span class="tag tag-blue">' + escapeHtml(cnCountry(item["目标国家/城市"])) + '</span>');
     }
 
     if (item["归属BG"]) {
@@ -339,7 +350,7 @@
           '<tr>',
           '  <td><span class="dot dot-' + escapeHtml(dot) + '"></span></td>',
           '  <td><div class="cell-title">' + escapeHtml(item["线索名称"] || item["商机名称"]) + '</div><div class="cell-sub">' + escapeHtml(subParts.join(" · ")) + '</div></td>',
-          '  <td>' + escapeHtml(item["目标国家/城市"] || "-") + '</td>',
+          '  <td>' + escapeHtml(cnCountry(item["目标国家/城市"])) + '</td>',
           '  <td><span class="tag tag-' + escapeHtml(type) + '">' + escapeHtml(item["类型"] || "-") + '</span></td>',
           '  <td><span class="tag tag-' + escapeHtml(status) + '">' + escapeHtml(item["状态"]) + '</span></td>',
           '  <td>' + escapeHtml(item["归属BG"] || "-") + '</td>',
