@@ -1,0 +1,9 @@
+channel_id,sales_sub_types,sales_products,sales_biz_types,sales_api_methods,sales_languages
+CH001,"OTA,B2B批发商","酒店,机票,商旅解决方案","B2B,B2B2C","API,商家后台","en,zh"
+CH002,"B2B批发商,OTA","酒店,玩乐门票,度假旅游(团游)","B2B,B2B2C","API,商家后台","en,es"
+CH003,"TMC,旅行社","机票,酒店,商旅解决方案,签证/保险","B2B","API,线下","en"
+CH005,"OTA,B2B批发商","机票,酒店,租车/接送机,度假旅游(团游)","B2B,B2C,B2B2C","API,商家后台","en,ms"
+CH006,"OTA,社交电商","玩乐门票,酒店,租车/接送机","B2C,B2B2C","API,商家后台","en,ja,ko"
+CH007,"旅行社,B2B批发商","酒店,度假旅游(团游),签证/保险","B2B","线下,商家后台","ar,en"
+CH009,"社交电商,异业","酒店,民宿,玩乐门票","B2C,B2B2C","商家后台","zh,en,th"
+CH010,"TMC,系统解决方案","商旅解决方案,系统解决方案,酒店","B2B,系统解决方案","API","en,de"

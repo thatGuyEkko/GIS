@@ -6,6 +6,10 @@
       page: 'dashboard.html',
       title: '商机看板'
     },
+    channels: {
+      page: 'global-channel-hub.html?v=20260724a',
+      title: '全球渠道信息共享看板'
+    },
     travel: {
       page: 'global-travel-intel.html?v=20260723l',
       title: '全球化旅业信息看板'
@@ -77,6 +81,7 @@
 
     var map = {
       '商机看板': '看板',
+      '全球渠道信息共享看板': '渠道',
       '全球化旅业信息看板': '旅业',
       '线索商机管理': '线索',
       '商机评估管理': '评估',

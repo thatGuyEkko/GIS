@@ -1,0 +1,11 @@
+channel_id,channel_name,channel_types,regions,short_intro,intro
+CH001,Aurora Global Distribution,销售渠道,"SG,AE,JP,TH",聚焦亚太酒店与机票分销的 B2B 渠道平台。,"覆盖东南亚、东北亚与海湾市场，可通过 API 或后台模式承接酒店库存、航旅套餐与商旅流量。"
+CH002,Meridian Beds Exchange,"销售渠道,供应渠道","ES,AE,MX,TH",兼具采购与分销能力的全球 bedbank 渠道。,"可同时作为酒店供给整合入口和 B2B 批发分销渠道，适合酒旅 BG 做库存采买、套餐打包与区域渠道放量。"
+CH003,Atlas Corporate Travel Hub,销售渠道,"GB,SG,US,AE",聚焦企业差旅与会奖业务的 TMC 网络。,"擅长企业商旅、MICE 与长协客户运营，适合商旅 BG 筛选高价值企业客户与跨国差旅落地伙伴。"
+CH004,Horizon Stay Collection,供应渠道,"TH,VN,AE,ID",东南亚和中东酒店资源整合方。,"覆盖度假酒店、城市商务酒店与长住公寓，可通过 API 或后台同步房态、价格与合同信息。"
+CH005,SkyBridge Air Connect,"销售渠道,供应渠道","MY,SG,ID,PH",以航司座位与打包产品为核心的航旅平台。,"同时具备航司资源采购与机酒套餐分销能力，适合出行 BG 做机票接入、本地航旅合作与联合营销。"
+CH006,Koru Experience Market,"销售渠道,供应渠道","JP,KR,HK,TH",玩乐门票与目的地体验分销平台。,"可连接景区、城市观光、短途团与门票资源，适合玩乐与目的地 BG 做 API 分销和内容导购。"
+CH007,Desert Gate Trade Desk,销售渠道,"AE,SA,EG,QA",覆盖海湾市场的 B2B 地接与旅行社网络。,"对阿拉伯语销售链路、团队游与目的地产品熟悉，适合作为中东区域的线下分销与本地 BD 抓手。"
+CH008,Nexus Mobility Supply,供应渠道,"US,GB,AE,AU",租车与接送机供应侧资源平台。,"提供车队、机场接送与本地用车接口，适合出行 BG 与酒旅 BG 打包交通产品。"
+CH009,Pulse Social Commerce Travel,销售渠道,"CN,SG,TH,MY",偏社交电商与内容种草转化的分销渠道。,"可通过达人分销、直播专题页与商家后台承接年轻客群，适合内容电商或增长团队做新品试水。"
+CH010,Summit Venue Connect,销售渠道,"FI,AE,SG,DE",会奖场地与会务系统解决方案平台。,"以商旅解决方案、会奖场地撮合和系统接入为主，适合商旅 BG 或技术 BG 做 SaaS 与系统方案出海。"

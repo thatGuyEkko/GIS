@@ -1,0 +1,20 @@
+contact_id,channel_id,last_name,first_name,title,languages,responsibility,is_sales,is_supply,phone,email,social_type_1,social_link_1,social_type_2,social_link_2
+C001,CH001,Chen,Iris,APAC Distribution Lead,"zh,en","负责亚太酒店分销接入、价格策略与季度合作计划。",Y,N,+65-6001-1001,iris.chen@auroragd.example,LinkedIn,https://www.linkedin.com/in/iris-chen-example,WeChat,https://example.com/wechat/iris-chen
+C002,CH001,Tan,Marcus,Partner Success Manager,en,"负责 API 对接排期、商家后台培训与大客户上线支持。",Y,N,+65-6001-1002,marcus.tan@auroragd.example,LinkedIn,https://www.linkedin.com/in/marcus-tan-example,WhatsApp,https://example.com/wa/marcus-tan
+C003,CH002,Garcia,Elena,Global Market Director,"en,es","负责 bedbank 分销合作、区域渠道管理与重点客户价格策略。",Y,N,+34-9100-2001,elena.garcia@meridianbeds.example,LinkedIn,https://www.linkedin.com/in/elena-garcia-example,,
+C004,CH002,Lopez,Carlos,Supply Contracting Head,"en,es","负责酒店签约、景区资源整合与房态合同管理。",N,Y,+34-9100-2002,carlos.lopez@meridianbeds.example,LinkedIn,https://www.linkedin.com/in/carlos-lopez-example,,
+C005,CH003,Wilson,Amy,Enterprise Sales Lead,en,"负责跨国企业差旅客户拓展、框架协议与季度招投标。",Y,N,+44-20-3000-3001,amy.wilson@atlascth.example,LinkedIn,https://www.linkedin.com/in/amy-wilson-example,,
+C006,CH003,Moore,Daniel,MICE Program Manager,en,"负责会奖团组落地、商旅产品打包和本地服务协同。",Y,N,+44-20-3000-3002,daniel.moore@atlascth.example,LinkedIn,https://www.linkedin.com/in/daniel-moore-example,,
+C007,CH004,Lim,Sophia,Regional Contracting Director,"en,th","负责东南亚酒店签约、房态同步与收益条款管理。",N,Y,+66-2-410-4001,sophia.lim@horizonstay.example,LinkedIn,https://www.linkedin.com/in/sophia-lim-example,,
+C008,CH004,Nguyen,Oliver,Connectivity Manager,"en,vi","负责 PMS / CRS 接口映射、库存校验与上线验收。",N,Y,+84-28-3900-4002,oliver.nguyen@horizonstay.example,LinkedIn,https://www.linkedin.com/in/oliver-nguyen-example,,
+C009,CH005,Rahman,Aina,Air Partnership Lead,"en,ms","负责航司资源谈判、包座产品设计与联合营销。",Y,N,+60-3-5000-5001,aina.rahman@skybridgeair.example,LinkedIn,https://www.linkedin.com/in/aina-rahman-example,,
+C010,CH005,Santos,Paolo,Supply Operations Director,en,"负责机票资源履约、退改流程与供应侧 SLA 管理。",N,Y,+63-2-6100-5002,paolo.santos@skybridgeair.example,LinkedIn,https://www.linkedin.com/in/paolo-santos-example,,
+C011,CH006,Sato,Mika,Destination Growth Lead,"ja,en","负责日本和韩国玩乐门票分销、活动专题与达人成交。",Y,N,+81-3-5100-6001,mika.sato@koru-market.example,LinkedIn,https://www.linkedin.com/in/mika-sato-example,,
+C012,CH006,Kim,Jason,Supply Partnership Manager,"ko,en","负责景区签约、门票库存配置与体验类供应整合。",N,Y,+82-2-6200-6002,jason.kim@koru-market.example,LinkedIn,https://www.linkedin.com/in/jason-kim-example,,
+C013,CH007,Hassan,Lina,GCC Trade Sales Head,"ar,en","负责海湾市场旅行社网络、线下分销策略与重点 BD 拓展。",Y,N,+971-4-700-7001,lina.hassan@desertgate.example,LinkedIn,https://www.linkedin.com/in/lina-hassan-example,WhatsApp,https://example.com/wa/lina-hassan
+C014,CH007,Ahmed,Omar,Destination Product Manager,"ar,en","负责地接产品包、团队游路由与本地合作商协同。",Y,N,+971-4-700-7002,omar.ahmed@desertgate.example,LinkedIn,https://www.linkedin.com/in/omar-ahmed-example,,
+C015,CH008,Brown,Claire,Global Mobility Partnerships Lead,en,"负责租车公司接入、机场接送产品组合与价格合同维护。",N,Y,+1-415-800-8001,claire.brown@nexusmobility.example,LinkedIn,https://www.linkedin.com/in/claire-brown-example,,
+C016,CH009,Zhang,Nina,Social Commerce Manager,"zh,en,th","负责达人合作、直播转化与社交电商专题页运营。",Y,N,+86-21-8800-9001,nina.zhang@pulsetravel.example,LinkedIn,https://www.linkedin.com/in/nina-zhang-example,WeChat,https://example.com/wechat/nina-zhang
+C017,CH009,Lee,Kevin,Creator Partnership Lead,"en,th","负责异业流量互换、内容合作与活动档期协调。",Y,N,+66-2-8800-9002,kevin.lee@pulsetravel.example,LinkedIn,https://www.linkedin.com/in/kevin-lee-example,,
+C018,CH010,Schmidt,Lara,Solutions Sales Director,"en,de","负责商旅系统方案售前、企业客户方案设计与签约。",Y,N,+49-30-7700-1001,lara.schmidt@summitvenue.example,LinkedIn,https://www.linkedin.com/in/lara-schmidt-example,,
+C019,CH010,Wang,Eric,Implementation Architect,"en,zh","负责 API 集成、主数据映射与会务系统上线实施。",Y,N,+65-6200-1002,eric.wang@summitvenue.example,LinkedIn,https://www.linkedin.com/in/eric-wang-example,,
